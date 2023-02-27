@@ -14,10 +14,10 @@ from PyQt6.QtCore import Qt, QEvent, pyqtSlot, QTimer
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QPushButton, QLabel, QFormLayout, QComboBox, \
     QDoubleSpinBox
 
-from src.static_functions.yaml import save_settings, load_settings
+from src.devices.main_device import Device
 
 
-class CameraAndor:
+class CameraAndor(Device):
     NAME = "Andor Camera"
     ICON = "cam"
 
@@ -63,8 +63,6 @@ class CameraAndor:
         20992: "DRV_NOT_AVAILABLE"
     }
 
-    save_file_path = os.path.join(".config", "devices", "camera_andor.yaml")
-
     def __init__(self, address=6924):
         # Variables
         self.address = int(address)      # Serial Number
@@ -87,14 +85,6 @@ class CameraAndor:
         self._emccd_gain = 1
 
         self.connect()
-
-    def __repr__(self):
-        """
-        Return current state
-        """
-        return f"{self.NAME} at {self.address}\n" \
-               f"Status: {self.get_last_error()}\n" \
-               f"Settings: {self.get_settings()}"
 
     def connect(self):
         """
@@ -134,9 +124,9 @@ class CameraAndor:
         logging.debug(f"{self.NAME}: Found Detector '{self.get_detector()}'")
 
         # Settings
-        settings = load_settings(path=self.save_file_path, default_settings=self.get_settings())
-        for attribute, value in settings.items():
-            self.__setattr__(attribute, value)
+        # settings = load_settings(path=self.save_file_path, default_settings=self.get_settings())
+        # for attribute, value in settings.items():
+        #     self.__setattr__(attribute, value)
 
         # Default Settings
         self.set_cooler_on()
@@ -157,7 +147,7 @@ class CameraAndor:
         """
         Disconnect from Camera
         """
-        save_settings(path=self.save_file_path, settings=self.get_settings())
+        # save_settings(path=self.save_file_path, settings=self.get_settings())
         status = self._ser.ShutDown()
         logging.info(f"{self.NAME}: Send ShutDown(), Status: {self.STATUS_CODES[status]}.")
 

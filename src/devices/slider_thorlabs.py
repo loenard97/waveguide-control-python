@@ -3,7 +3,7 @@ import logging
 from PyQt6.QtCore import QTimer, pyqtSlot, QEvent
 from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QGridLayout
 
-from src.devices.device_main import USBDevice
+from src.devices.main_device import USBDevice
 
 
 class SliderThorlabs(USBDevice):

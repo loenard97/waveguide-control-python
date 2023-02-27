@@ -26,6 +26,9 @@ class ToggleButton(QPushButton):
         self._handle_clicked()
 
     def _handle_clicked(self):
+        """
+        Change color when clicked
+        """
         if self.isChecked():
             self.setText(self.labels[0])
             self.setStyleSheet(f"background-color : {self.colors[0]}")

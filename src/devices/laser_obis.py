@@ -4,20 +4,20 @@ Coherent OBIS Laser with 594nm wavelength and 60mW Power
 
 import logging
 
-from PyQt6.QtCore import QTimer, QEvent, pyqtSlot, QSettings
+from PyQt6.QtCore import QTimer, QEvent, pyqtSlot, QSettings, QSize, QPoint
 from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QVBoxLayout, QDoubleSpinBox, QPushButton, QHBoxLayout
 
-from src.devices.device_main import USBDevice
+from src.devices.main_device import USBDevice
 from src.static_gui_elements.toggle_button import ToggleButton
 
 
-class OBISLaser(USBDevice):
+class LaserOBIS(USBDevice):
 
     NAME = "OBIS Laser"
     TERMINATION_WRITE = "\r\n"
     TERMINATION_READ = 2
 
-    def write(self, message: str, error_checking=True):
+    def write(self, message: str, error_checking=False):
         """
         Write Message to Device
         :param str message: Message to send
@@ -27,7 +27,7 @@ class OBISLaser(USBDevice):
         super().write(message, error_checking=error_checking)
         self._ser.readline()
 
-    def read(self, message: str, error_checking=True) -> str:
+    def read(self, message: str, error_checking=False) -> str:
         """
         Read Message from Device
         :param str message: Message to query
@@ -109,13 +109,13 @@ class OBISLaser(USBDevice):
 
 
 class OBISLaserWindow(QWidget):
-    def __init__(self, device: OBISLaser):
+    def __init__(self, device: LaserOBIS):
         super().__init__()
         # Variables
         self._device = device
         self.setWindowTitle(f"{self._device.NAME}")
-        self.resize(QSettings().value(f"{self._device.NAME}_window/size"))
-        self.move(QSettings().value(f"{self._device.NAME}_window/position"))
+        self.resize(QSettings().value(f"{self._device.NAME}_window/size", QSize(1400, 700)))
+        self.move(QSettings().value(f"{self._device.NAME}_window/position", QPoint(300, 150)))
 
         # Layout Settings
         layout_settings = QFormLayout()

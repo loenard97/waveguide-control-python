@@ -2,7 +2,6 @@ import os
 import yaml
 import logging
 import importlib
-import subprocess
 
 from PyQt6.QtCore import Qt, pyqtSlot, QEvent, QSettings, QSize, QPoint
 from PyQt6.QtGui import QIcon, QAction
@@ -25,8 +24,6 @@ class MainWindow(QMainWindow):
         self.resize(QSettings().value("main_window/size", QSize(1400, 700)))
         self.move(QSettings().value("main_window/position", QPoint(300, 150)))
         self.setWindowIcon(QIcon(os.path.join("src", "images", "icon.svg")))
-        self.setWindowTitle(f"Microscope Experiment Control Application - "
-                            f"{subprocess.check_output(['git', 'describe', '--tags']).decode('ascii').strip()}")
 
         # Connect to Devices
         devices_dict = {}
@@ -37,11 +34,12 @@ class MainWindow(QMainWindow):
                 devices_dict = yaml.load(file, Loader=yaml.FullLoader)
         for name, args in devices_dict.items():
             try:
+                logging.info(f"Main Window: Connecting to '{name}' at '{args['Address']}'.")
                 device_class = getattr(importlib.import_module(f"src.devices.{args['File']}"), args['Class'])
                 self.devices[args["Handle"]] = device_class(name, args["Address"], args.get("Settings"))
                 logging.log(level=100, msg=f"Main Window: Connected to '{name}' at '{args['Address']}'.")
 
-            except (ConnectionError, ModuleNotFoundError) as err:
+            except (ConnectionError, ModuleNotFoundError, AttributeError) as err:
                 logging.error(f"Main Window: Could not connect to {name}. Error: '{err}'.")
                 failed_connections += name + ', '
 

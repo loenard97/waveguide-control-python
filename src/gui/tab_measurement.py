@@ -8,6 +8,7 @@ from PyQt6.QtCore import Qt, pyqtSlot
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QProgressBar, QLabel
 
+from src.measurement.main_measurement import DataType
 from src.static_gui_elements.plot_widget import PlotWidget
 
 
@@ -73,13 +74,13 @@ class MeasurementTab(QWidget):
             if not observable_dict["plot"]:
                 continue
 
-            if observable_dict["data_format"] == "float":
+            if observable_dict["data_type"] == DataType.Number:
                 plot_widget = PlotWidget()
                 plot_widget.set_labels(measurement.iterators_list[0][0], observable_name)
                 self._plots_observables[observable_name] = plot_widget
                 new_layout.addWidget(plot_widget)
 
-            elif observable_dict["data_format"] == "image":
+            elif observable_dict["data_type"] == DataType.Image:
                 plot_item = pg.PlotItem(enableMenu=False)
                 image_item = pg.ImageItem()
                 color_bar = pg.ColorBarItem(interactive=False)
@@ -93,7 +94,7 @@ class MeasurementTab(QWidget):
                 self._plots_observables[observable_name] = plot_dict
                 new_layout.addWidget(plot_widget)
 
-            elif observable_dict["data_format"] == "histogram":
+            elif observable_dict["data_type"] == DataType.Histogram:
                 plot_widget = PlotWidget()
                 plot_widget.set_labels("Index / ps", "Counts")
                 self._plots_observables[observable_name] = plot_widget
@@ -117,12 +118,12 @@ class MeasurementTab(QWidget):
             if not observable_dict["plot"]:
                 continue
 
-            if observable_dict["data_format"] == "float":
+            if observable_dict["data_type"] == DataType.Number:
                 self._plots_observables[observable_name].plot_data(
                     x_data=measurement.iterators_list[0][1], y_data=observable_dict["data"][str(pos_2)],
                     color=observable_dict["plot_color"])
 
-            elif observable_dict["data_format"] == "image":
+            elif observable_dict["data_type"] == DataType.Image:
                 self._plots_observables[observable_name]["image_item"].setImage(observable_dict["data"])
                 try:
                     self._plots_observables[observable_name]["image_item"].setColorMap(
@@ -140,7 +141,7 @@ class MeasurementTab(QWidget):
                         self._plots_observables[observable_name]["image_item"],
                         insert_in=self._plots_observables[observable_name]["plot_item"])
 
-            elif observable_dict["data_format"] == "histogram":
+            elif observable_dict["data_type"] == DataType.Histogram:
                 self._plots_observables[observable_name].plot_data(
                     x_data=list(observable_dict["data"].values())[-1]["index"],
                     y_data=list(observable_dict["data"].values())[-1]["data"],

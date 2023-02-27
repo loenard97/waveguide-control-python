@@ -3,6 +3,7 @@ import sys
 import logging
 import platform
 import datetime
+import subprocess
 
 from PyQt6.QtCore import QSettings
 from PyQt6.QtWidgets import QApplication
@@ -42,9 +43,13 @@ def main():
                 f"Version: {system.version}, Machine: {system.machine}")
     python_version = sys.version.replace('\n', '')
     logging.log(level=100, msg=f"Python Version: {python_version}")
+    git_tag = subprocess.check_output(['git', 'describe', '--tags']).decode('ascii').strip()
+    logging.log(level=100, msg=f"MECA Version: {git_tag}")
 
     # Start Main Window
     main_win = MainWindow()
+    main_win.setWindowTitle(
+        f"Microscope Experiment Control Application - {git_tag}{' (Debug)' if '--debug' in sys.argv else ''}")
     main_win.show()
     sys.exit(app.exec())
 

@@ -7,11 +7,11 @@ import logging
 from PyQt6.QtCore import QTimer, QEvent, pyqtSlot
 from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, QFormLayout, QHBoxLayout,  QVBoxLayout, QMessageBox
 
-from src.devices.device_main import USBDevice
-from src.static_functions.wait import wait_msec
+from src.devices.main_device import USBDevice
+from src.static_functions.wait import event_loop_interrupt
 
 
-class ConexCCStage(USBDevice):
+class StageConex(USBDevice):
     
     BAUDRATE = 921600
     TERMINATION_WRITE = '\r\n'
@@ -72,7 +72,7 @@ class ConexCCStage(USBDevice):
         Block until Status Code is not MOVING or HOMING
         """
         while self.get_state() in ["MOVING", "HOMING"]:
-            wait_msec(200)
+            event_loop_interrupt(0.2)
 
     def get_position(self):
         """
@@ -121,7 +121,7 @@ class ConexCCStage(USBDevice):
 
 
 class ConexCCStageWindow(QWidget):
-    def __init__(self, device: ConexCCStage):
+    def __init__(self, device: StageConex):
         super().__init__()
         self.device = device
 

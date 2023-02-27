@@ -1,10 +1,10 @@
 from PyQt6.QtWidgets import QVBoxLayout, QLabel, QDoubleSpinBox, QFormLayout, QWidget, QComboBox
 
-from src.devices.device_main import USBDevice
+from src.devices.main_device import USBDevice
 from src.static_gui_elements.toggle_button import ToggleButton
 
 
-class DLNSECLaser(USBDevice):
+class LaserDLNSEC(USBDevice):
     NAME = "DLNSEC Laser"
     ICON = "laser"
     TERMINATION_WRITE = '\r'
@@ -91,7 +91,7 @@ class DLNSECLaser(USBDevice):
 
 
 class DLNSECLaserWindow(QWidget):
-    def __init__(self, device: DLNSECLaser):
+    def __init__(self, device: LaserDLNSEC):
         super().__init__()
         # Variables
         self._device = device

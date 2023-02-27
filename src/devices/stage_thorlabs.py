@@ -1,10 +1,10 @@
 import re
 
-from src.devices.device_main import USBDevice
-from src.static_functions.wait import wait_msec
+from src.devices.main_device import USBDevice
+from src.static_functions.wait import event_loop_interrupt
 
 
-class ThorlabsStage(USBDevice):
+class StageThorlabs(USBDevice):
     NAME = "Thorlabs MLS203-1 xy-Stage"
     ICON = "stage"
     TERMINATION_WRITE = '\r\n'
@@ -27,7 +27,7 @@ class ThorlabsStage(USBDevice):
         Block until Stage is Ready
         """
         while self.get_position() == (-1, -1):
-            wait_msec(200)
+            event_loop_interrupt(0.2)
 
     def home_to_zero(self, direction):
         """

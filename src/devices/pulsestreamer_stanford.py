@@ -5,10 +5,10 @@ Stanford Pulse Streamer
 from PyQt6.QtCore import pyqtSlot, QTimer
 from PyQt6.QtWidgets import QWidget, QLabel, QComboBox, QDoubleSpinBox, QMainWindow, QGridLayout
 
-from src.devices.device_main import EthernetDevice
+from src.devices.main_device import EthernetDevice
 
 
-class StanfordPulseStreamer(EthernetDevice):
+class PulsestreamerStanford(EthernetDevice):
 
     TERMINATION_READ = 2
 
@@ -183,7 +183,7 @@ class StanfordPulseStreamer(EthernetDevice):
 
 class StanfordPulseStreamerWindow(QMainWindow):
 
-    def __init__(self, device: StanfordPulseStreamer):
+    def __init__(self, device: PulsestreamerStanford):
         super().__init__()
         # Variables
         self._device = device

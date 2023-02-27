@@ -3,22 +3,32 @@ import re
 import h5py
 import logging
 import datetime
+import traceback
 import subprocess
 import numpy as np
+from enum import Enum
 
 from PyQt6.QtWidgets import QMessageBox
 
-from src.gui.main_window import MainWindow
 from src.measurement.pulse_sequence import Sequence
 from src.static_functions.wait import event_loop_interrupt
-from src.static_functions.parse_traceback import parse_traceback
+
+
+class DataType(Enum):
+    """
+    Data Type of Observable
+    """
+    Number = 0
+    Histogram = 1
+    Image = 2
 
 
 class Measurement:
+
     name = "Name not defined"
     parameters = []
 
-    def __init__(self, main_window: MainWindow, devices_dict: dict):
+    def __init__(self, main_window, devices_dict: dict):
         self._main_window = main_window
 
         self.iterators_list = []
@@ -60,7 +70,7 @@ class Measurement:
 
         # Setup Save File
         measurement_name = re.sub(r"[ ./\\]", '', self.name).casefold()
-        self.save_file_path = os.path.join(os.getcwd(), "data",
+        self.save_file_path = os.path.join(os.getcwd(), "data", f"{self._main_window.tab_script.directory}",
                                            f"{datetime.datetime.now():%Y-%m-%d_%H-%M-%S}_{measurement_name}")
         if not os.path.isdir(self.save_file_path):
             os.makedirs(self.save_file_path)
@@ -69,13 +79,17 @@ class Measurement:
             file.create_group("Iterators")
             file.create_group("Observables")
 
+        # Reset Devices
+        for device in self.devices.values():
+            device.soft_reset()
+
         # Execute Setup Function of Measurement
         logging.info(f"{self.name}: Starting Setup Function")
         try:
             self.setup_measurement(self.parameters_dict)    # NOQA
         except Exception as err:
             logging.error(f"{self.name}: Error during Setup of Script: '{err}'")
-            file, line, line_number = parse_traceback()
+            file, line, line_number = self._parse_traceback()
             QMessageBox.critical(
                 self._main_window, "Error",
                 "A fatal error occurred during the Setup of the Measurement:\n\n"
@@ -97,7 +111,7 @@ class Measurement:
             self.shutdown_measurement(self.parameters_dict)    # NOQA
         except Exception as err:
             logging.error(f"{self.name}: Error during Setup of Script: '{err}'")
-            file, line, line_number = parse_traceback()
+            file, line, line_number = self._parse_traceback()
             QMessageBox.critical(
                 self._main_window, "Error",
                 "A fatal error occurred during the Setup of the Measurement:\n\n"
@@ -127,7 +141,7 @@ class Measurement:
                     self.run_measurement(var_dict)    # NOQA
                 except Exception as error:
                     logging.error(f"{self.name}: Error during Measurement: '{error}'")
-                    file, line, line_number = parse_traceback()
+                    file, line, line_number = self._parse_traceback()
                     QMessageBox.critical(
                         self._main_window, "Error",
                         "A fatal error occurred during the Setup of the Measurement:\n\n"
@@ -142,14 +156,15 @@ class Measurement:
                 self._main_window.tab_measurement.redraw_plots()
                 self.current_point += 1
 
-    def add_observable(self, name: str, save=True, data_format="float", plot=True, plot_color="green",
-                       plot_color_map="inferno", plot_color_bar=True, plot_windowed=False):
+    def add_observable(self, name: str, data_type=DataType.Number, save=True, plot=True, plot_color="green"):
         """
         Add new Observable
+        :param str name: Name of Observable
+        :param DataType data_type: Type of Observable Data
+        :param bool save: Whether the Observable gets saved or not
+        :param bool plot: Whether the Observable gets plotted or not
+        :param str plot_color: Line Color in Observable Plot
         """
-        # TODO: add counter
-        assert data_format in ["float", "image", "histogram"], "data_format has to be 'float', 'image' or 'histogram'"
-
         # save all settings in dict
         attributes_dict = locals()
         attributes_dict.pop("self")
@@ -162,17 +177,18 @@ class Measurement:
         :param str observable: Name
         :param data: Data Point
         """
+        # TODO: assert correct data type
         assert observable in self.observables, f"Observable '{observable}' does not exist."
 
         pos_1 = self.current_point % len(self.iterators_list[0][1])
         pos_2 = self.current_point // len(self.iterators_list[0][1])
 
-        if self.observables[observable]["data_format"] == "float":
+        if self.observables[observable]["data_type"] == DataType.Number:
             if str(pos_2) not in self.observables[observable]["data"]:
                 self.observables[observable]["data"][str(pos_2)] = np.zeros(shape=len(self.iterators_list[0][1]))
             self.observables[observable]["data"][str(pos_2)][pos_1] = data
 
-        elif self.observables[observable]["data_format"] == "histogram":
+        elif self.observables[observable]["data_type"] == DataType.Histogram:
             self.observables[observable]["data"][f"{pos_1}_{pos_2}"] = {}
             self.observables[observable]["data"][f"{pos_1}_{pos_2}"]["data"] = data.getData()
             self.observables[observable]["data"][f"{pos_1}_{pos_2}"]["index"] = data.getIndex()
@@ -198,7 +214,7 @@ class Measurement:
             f"Script: {self._main_window.tab_script.script}",
             f"Name: {self.name}",
             f"Time Start: {datetime.datetime.fromtimestamp(self.timestamps[0]):%Y-%m-%d %H:%M:%S}",
-            f"Time Stop: {datetime.datetime.fromtimestamp(self.timestamps[0]):%Y-%m-%d %H:%M:%S}",
+            f"Time Stop: {datetime.datetime.fromtimestamp(self.timestamps[-1]):%Y-%m-%d %H:%M:%S}",
         ], dtype='S')
         git_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
         git_tag = subprocess.check_output(['git', 'describe', '--tags']).decode('ascii').strip()
@@ -248,17 +264,48 @@ class Measurement:
                 obs_name_safe = observable_name.replace('/', 'in')
                 file["Observables"].create_group(obs_name_safe)
 
-                if observable_dict["data_format"] == "float":
+                if observable_dict["data_type"] == DataType.Number:
                     for name, arr in observable_dict["data"].items():
                         file["Observables"][obs_name_safe].create_dataset(
                             name=name, data=arr, dtype='f')
 
-                elif observable_dict["data_format"] == "histogram":
+                elif observable_dict["data_type"] == DataType.Histogram:
                     for data, value in observable_dict["data"].items():
-                        if observable_dict["data_format"] == "histogram":
-                            file["Observables"][obs_name_safe].create_dataset(
-                                name=data, data=value["data"], dtype='f')
+                        file["Observables"][obs_name_safe].create_dataset(name=data, data=value["data"], dtype='f')
 
     @staticmethod
-    def wait(timeout):
+    def wait(timeout: float):
+        """
+        Wait for number of seconds
+        :param float timeout: Length of Timeout in seconds
+        """
         event_loop_interrupt(timeout)
+
+    @staticmethod
+    def _parse_traceback():
+        """
+        Find Measurement Script in Traceback where last Error occurred
+        """
+        tb = traceback.format_exc()
+        logging.critical(tb)
+
+        traceback_lines = tb.split('\n')
+        file = "<File not found>"
+        line = "<Line not found>"
+        line_number = "<Line Number not found>"
+        for i, line in enumerate(traceback_lines):
+            if line.startswith("  File ") and "scripts" in line:
+                file, line_number, _ = line.split(', ')
+                file = file[8:-1]
+                file_path = file.split(os.sep)
+                file = ''
+                for e in file_path[file_path.index("scripts") + 1:]:
+                    file += e + os.sep
+                file = file[:-1]
+                line_number = line_number[5:]
+                line = traceback_lines[i + 1][4:]
+                break
+            else:
+                continue
+
+        return file, line, line_number

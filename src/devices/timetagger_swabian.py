@@ -19,7 +19,7 @@ except ModuleNotFoundError:
     logging.critical("Could not load TimeTagger Module. Is the Time Tagger Software installed?")
 
 
-class SwabianTimeTagger:
+class TimetaggerSwabian:
     """
     TimeTagger Series by Swabian Instruments
     """
@@ -58,9 +58,15 @@ class SwabianTimeTagger:
 
     def reset(self):
         """
-        Reset
+        Reset Device to default Settings
         """
         self._ser.reset()
+
+    def soft_reset(self):
+        """
+        Reset Device but keep initial Settings
+        """
+        self.reset()
 
     def synchronize(self):
         """

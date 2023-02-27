@@ -15,7 +15,7 @@ from ftplib import FTP
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QDoubleSpinBox, QVBoxLayout
 
-from src.devices.device_main import EthernetDevice
+from src.devices.main_device import EthernetDevice
 from src.static_gui_elements.toggle_button import ToggleButton
 
 
@@ -45,9 +45,15 @@ class RFGRohdeSchwarz(EthernetDevice):
 
     def reset(self):
         """
-        Reset to Default Settings
+        Reset Device to default Settings
         """
         self.write("*RST")
+
+    def soft_reset(self):
+        """
+        Reset Device but keep initial Settings
+        """
+        self.reset()
 
     def trigger(self):
         """
@@ -130,13 +136,13 @@ class RFGRohdeSchwarz(EthernetDevice):
         self.set_channel(channel)
         return float(self.read("POW?"))
 
-    def set_frequency(self, channel=1, frequency=1000):
+    def set_frequency(self, channel=1, frequency=1_000_000):
         """
-        Set Frequency in MHz
+        Set Frequency in Hz
         """
         assert channel == 1, "Channel has to be 1"
 
-        self.write(f"FREQ {frequency}MHz")
+        self.write(f"FREQ {frequency}Hz")
 
     def get_frequency(self, channel=1):
         """

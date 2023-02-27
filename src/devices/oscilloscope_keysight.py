@@ -1,4 +1,4 @@
-from src.devices.device_main import EthernetDevice
+from src.devices.main_device import EthernetDevice
 from src.static_gui_elements.toggle_button import ToggleButton
 
 from PyQt6.QtCore import pyqtSlot
@@ -16,7 +16,7 @@ def test_keysight_1200x_osci():
         handlers=[logging.StreamHandler(sys.stdout)]
     )
 
-    osci = Keysight1200XOsci("192.168.88.131")
+    osci = OscilloscopeKeysight("192.168.88.131")
     print(osci.get_identity())
     print(osci.read("ACQuire:TYPE?"))
     print(osci.read("ACQuire:COMPlete?"))
@@ -32,7 +32,7 @@ def test_keysight_1200x_osci():
     # print(osci.read("LISTer:DATA?"))
 
 
-class Keysight1200XOsci(EthernetDevice):
+class OscilloscopeKeysight(EthernetDevice):
     NAME = "Keysight 1200X Series Oscilloscope"
     ICON = "osci"
 
@@ -59,7 +59,7 @@ class Keysight1200XOsci(EthernetDevice):
 
 
 class Keysight1200XOsciWindow(QWidget):
-    def __init__(self, device: Keysight1200XOsci):
+    def __init__(self, device: OscilloscopeKeysight):
         super().__init__()
         self.device = device
 

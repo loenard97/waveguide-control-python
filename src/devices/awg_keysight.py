@@ -6,7 +6,7 @@ from PyQt6.QtCore import pyqtSlot, QTimer
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QComboBox, QFormLayout, QDoubleSpinBox, QVBoxLayout, \
     QMainWindow, QFrame
 
-from src.devices.device_main import EthernetDevice
+from src.devices.main_device import EthernetDevice
 from src.static_gui_elements.toggle_button import ToggleButton
 
 
@@ -69,9 +69,15 @@ class AWGKeysight(EthernetDevice):
 
     def reset(self):
         """
-        Reset to Factory Defaults
+        Reset Device to default Settings
         """
         self.write("*RST")
+
+    def soft_reset(self):
+        """
+        Reset Device but keep initial Settings
+        """
+        self.reset()
 
     def trigger(self):
         """

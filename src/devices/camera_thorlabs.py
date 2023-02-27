@@ -1,3 +1,7 @@
+"""
+UC480 Thorlabs Camera
+"""
+
 import os
 import sys
 import logging
@@ -10,7 +14,7 @@ if sys.platform == "win32":
     import uc480    # NOQA
 
 
-class UC480Camera:
+class CameraThorlabs:
     NAME = "Thorlabs UC480 Camera"
     ICON = "cam"
 

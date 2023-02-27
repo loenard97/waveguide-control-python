@@ -6,7 +6,10 @@ import pyqtgraph as pg
 from PyQt6.QtCore import Qt, pyqtSlot, QEvent, QTimer
 from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QHBoxLayout, QPushButton, QVBoxLayout, QLineEdit, QComboBox
 
-from src.devices.lib_camera_ximea import xiapi
+try:
+    from src.devices.lib_camera_ximea import xiapi
+except OSError:
+    logging.error("Could not import Ximea Camera API. Is the Ximea Software installed?")
 
 
 class CameraXimea:

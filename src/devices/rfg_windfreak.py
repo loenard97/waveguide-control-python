@@ -10,11 +10,11 @@ Windfreak SynthHDv2 Radio Frequency Generator
 from PyQt6.QtCore import pyqtSlot, QTimer
 from PyQt6.QtWidgets import QLabel, QFormLayout, QWidget, QGridLayout, QDoubleSpinBox
 
-from src.devices.device_main import USBDevice
+from src.devices.main_device import USBDevice
 from src.static_gui_elements.toggle_button import ToggleButton
 
 
-class SynthHDv2RFG(USBDevice):
+class RFGWindfreak(USBDevice):
     NAME = "RFG WindFreak SynthHDv2"
     ICON = "rfg"
 
@@ -395,7 +395,7 @@ class SynthHDv2RFG(USBDevice):
 
 
 class SynthHDv2RFGWindow(QWidget):
-    def __init__(self, device: SynthHDv2RFG):
+    def __init__(self, device: RFGWindfreak):
         super().__init__()
         # Variables
         self._device = device

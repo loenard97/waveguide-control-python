@@ -15,7 +15,7 @@ from src.static_functions.wait import event_loop_interrupt
 from src.static_gui_elements.toggle_button import ToggleButton
 
 
-class SwabianPulseStreamer:
+class PulsestreamerSwabian:
     """
     PulseStreamer Series by Swabian Instruments
     """
@@ -63,6 +63,12 @@ class SwabianPulseStreamer:
         self._output_state = OutputState([])
         self._ser.constant(self._output_state)
         logging.info(f"{self.name}: Reset.")
+
+    def soft_reset(self):
+        """
+        Reset Device but keep initial Settings
+        """
+        self.reset()
 
     def reboot(self):
         """
@@ -232,7 +238,7 @@ class SwabianPulseStreamer:
 
 class SwabianPulseStreamerWindow(QMainWindow):
 
-    def __init__(self, device: SwabianPulseStreamer):
+    def __init__(self, device: PulsestreamerSwabian):
         super().__init__()
         # Variables
         self._device = device

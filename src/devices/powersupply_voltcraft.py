@@ -1,5 +1,5 @@
 """
-Voltcraft Power Supply PPS11360
+Voltcraft Power Supply PPS-11360
 """
 
 import serial
@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QFormLayout, QHBoxL
 from src.static_gui_elements.toggle_button import ToggleButton
 
 
-class PPS11360:
+class PowersupplyVoltcraft:
 
     def __init__(self, name, address, settings):
         self.name = name
@@ -210,7 +210,7 @@ class PPS11360:
 
 class PPS11360Window(QWidget):
 
-    def __init__(self, device: PPS11360):
+    def __init__(self, device: PowersupplyVoltcraft):
         super().__init__()
         # Variables
         self._device = device
