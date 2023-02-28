@@ -121,7 +121,7 @@ class RFGRohdeSchwarz(EthernetDevice):
             return True
         return False
 
-    def set_amplitude(self, channel=1, amplitude=-40):
+    def set_amplitude(self, channel=1, amplitude=-40.0):
         """
         Set Amplitude in dBm
         """
@@ -136,7 +136,7 @@ class RFGRohdeSchwarz(EthernetDevice):
         self.set_channel(channel)
         return float(self.read("POW?"))
 
-    def set_frequency(self, channel=1, frequency=1_000_000):
+    def set_frequency(self, channel=1, frequency=1_000_000.0):
         """
         Set Frequency in Hz
         """
@@ -150,6 +150,18 @@ class RFGRohdeSchwarz(EthernetDevice):
         """
         self.set_channel(channel)
         return float(self.read("FREQ?"))
+
+    def set_constant_mw(self, channel=1, frequency=1_000_000.0, amplitude=-40.0, state=False):
+        """
+        Set Constant MW Output
+        :param int channel: Channel Number
+        :param float frequency: Frequency in Hz
+        :param float amplitude: Amplitude in dBm
+        :param bool state: Output on | off
+        """
+        self.set_frequency(channel=channel, frequency=frequency)
+        self.set_amplitude(channel=channel, amplitude=amplitude)
+        self.set_output(channel=channel, state=state)
 
     def set_pulse_modulation(self, channel=1, source="EXT", state=False):
         """

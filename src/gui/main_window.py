@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
                 self.devices[args["Handle"]] = device_class(name, args["Address"], args.get("Settings"))
                 logging.log(level=100, msg=f"Main Window: Connected to '{name}' at '{args['Address']}'.")
 
-            except (ConnectionError, ModuleNotFoundError, AttributeError) as err:
+            except Exception as err:
                 logging.error(f"Main Window: Could not connect to {name}. Error: '{err}'.")
                 failed_connections += name + ', '
 

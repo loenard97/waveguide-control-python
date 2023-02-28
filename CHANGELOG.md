@@ -8,19 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [TODO]
 
 ### Functionality
+ - make length of predefined pulse sequences On, Off and Trigger variable
 
 ### Bugs
+ - Parameters do not refresh when adding parameters in script
  - Plotting off by one data point
  - String representation of abort flag in raw data file broken
  - Plotting and timestamps of by one data point
 
 
-## [Unreleased]
+## [v1.1] - 2023-02-28
 
 ### Functionality
  - Data files are sorted into directories
  - Added Device Interface class
- - Added device and measurement imports
+ - Added device and measurement imports for scripts
  - Added more units for scripts
  - Added git tag to logging info
 
@@ -32,6 +34,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Set pulsestreamer package requirement to exact match because newer versions seem to be broken
 
 
-
-## [v1.0] - 2022-02-20
+## [v1.0] - 2023-02-20
 initial public release

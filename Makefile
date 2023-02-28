@@ -27,7 +27,7 @@ clean:
 	rm -rf logs
 
 debug:
-	$(PYTHON) main.py --loud
+	$(PYTHON) main.py --debug
 
 run:
 	$(PYTHON) main.py

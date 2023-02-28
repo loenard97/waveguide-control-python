@@ -1,6 +1,8 @@
 import numpy as np
 from dataclasses import dataclass
 
+from src.measurement.units import *
+
 
 class Sequence:
     """

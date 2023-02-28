@@ -386,14 +386,16 @@ class AWGKeysight(EthernetDevice):
             self.write(f"SOUR{channel}:BURS:STAT OFF")
 
     # Waveforms
-    def set_constant_dc(self, channel=1, offset=0.0):
+    def set_constant_dc(self, channel=1, offset=0.0, state=False):
         """
         Set constant DC Signal
         :param int | str channel: Channel Name
         :param float offset: Offset in V
+        :param bool state: Turn output on or off
         """
         channel = self._convert_channel(channel)
         self.write(f"SOUR{channel}:APPL:DC DEF, DEF, {offset}V")
+        self.set_output(channel=channel, state=state)
 
     def set_constant_ttl(self, channel=1, state=False):
         """
