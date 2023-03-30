@@ -373,17 +373,18 @@ class AWGKeysight(EthernetDevice):
         self.write(f"TRIG{channel}:SOURCE {source}")
         self.write(f"TRIG{channel}:SLOPE {slope}")
 
-    def set_burst_mode(self, channel=1, state=False, number_cycles=1, mode="TRIG"):
+    def set_burst_mode(self, channel=1, number_cycles=1, mode="TRIG", state=False):
         """
         Set Burst Mode
+        :param int | str channel: Channel Name
+        :param int number_cycles: Number of Cycles
+        :param str mode: Mode TRIG
+        :param bool state: State
         """
         channel = self._convert_channel(channel)
-        if state:
-            self.write(f"SOUR{channel}:BURS:STAT ON")                   # turn on
-            self.write(f"SOUR{channel}:BURS:NCYC {number_cycles}")      # number of cycles
-            self.write(f"SOUR{channel}:BURS:MODE {mode}")               # trigger mode
-        else:
-            self.write(f"SOUR{channel}:BURS:STAT OFF")
+        self.write(f"SOUR{channel}:BURS:NCYC {number_cycles}")
+        self.write(f"SOUR{channel}:BURS:MODE {mode}")
+        self.write(f"SOUR{channel}:BURS:STAT {'ON' if state else 'OFF'}")
 
     # Waveforms
     def set_constant_dc(self, channel=1, offset=0.0, state=False):
@@ -406,67 +407,65 @@ class AWGKeysight(EthernetDevice):
         channel = self._convert_channel(channel)
         self.write(f"SOUR{channel}:APPL:DC DEF, DEF, {3.3 if state else 0.0}V")
 
-    def set_function_pulse(self, channel: int, frequency, amplitude, offset, duty_cycle):
+    def set_function_pulse(self, channel=1, frequency=1.0, amplitude=1.0, offset=0.0, duty_cycle=50.0):
         """
         Set Pulse function
-        :param channel:      (1 | 2) Channel
-        :param frequency:    Frequency in Hz
-        :param amplitude:    Amplitude in V
-        :param offset:     Amplitude Offset in V
-        :param duty_cycle:    Duty Cycle in %
-        :return:        status code
-        """
-        if isinstance(frequency, str):
-            frequency = frequency.replace(',', '.')
-        if isinstance(amplitude, str):
-            amplitude = amplitude.replace(',', '.')
-        if isinstance(offset, str):
-            offset = offset.replace(',', '.')
-        if isinstance(duty_cycle, str):
-            duty_cycle = duty_cycle.replace(',', '.')
-
-        self.write(f"SOUR{channel}:FUNC PULS")                       # set function to pulse
-        self.write(f"SOUR{channel}:FREQ {frequency}")                     # set frequency in Hz
-        self.write(f"SOUR{channel}:VOLT {amplitude}")                     # set amplitude in V
-        self.write(f"SOUR{channel}:VOLT:OFFS {offset}")                  # set amplitude offset in V
-        self.write(f"SOUR{channel}:FUNC:PULS:DCYC {duty_cycle}")           # duty cycle
-        self.write(f"SOUR{channel}:FUNC:PULS:HOLD DCYC")              # hold duty cycle constant
-        # self.write(f"SOUR{ch}:FUNC:PULS:PER 1")               # period in s
-        # self.write(f"SOUR{ch}:FUNC:PULS:TRAN:BOTH 20e-9")     # flank length in s
-        # self.write(f"OUTP{ch} ON")                            # switch output 2 on
-
-    def set_function_arbitrary(self, channel, voltage_high, voltage_low, sequence, n_samples=1000):
-        """
-        Set Arbitrary Function
         :param int | str channel: Channel Name
-        :param float voltage_high: Voltage High in V
-        :param float voltage_low: Voltage Low in V
-        :param sequence: Pulse Sequence
-        :param float n_samples: Number of Samples
+        :param float frequency: Frequency in Hz
+        :param float amplitude: Amplitude in V
+        :param float offset: Offset in V
+        :param float duty_cycle: Duty Cycle in %
         """
         channel = self._convert_channel(channel)
-        if isinstance(voltage_high, str):
-            voltage_high = voltage_high.replace(',', '.')
-        if isinstance(voltage_low, str):
-            voltage_low = voltage_low.replace(',', '.')
-        if isinstance(n_samples, str):
-            n_samples = n_samples.replace(',', '.')
+
+        self.write(f"SOUR{channel}:FUNC PULS")
+        self.write(f"SOUR{channel}:FREQ {frequency}")
+        self.write(f"SOUR{channel}:VOLT {amplitude}")
+        self.write(f"SOUR{channel}:VOLT:OFFS {offset}")
+        self.write(f"SOUR{channel}:FUNC:PULS:DCYC {duty_cycle}")
+        self.write(f"SOUR{channel}:FUNC:PULS:HOLD DCYC")
+
+    def set_function_arbitrary(
+            self, channel=1, amplitude=1.0, offset=0.0, sequence=None, n_samples=1000,
+            trigger_source="EXT", trigger_slope="POS",
+            burst_cycles=1, burst_mode="TRIG", burst_state=True,
+            output_state=True):
+        """
+        Set Arbitrary Function.
+        Default settings play the waveform once on an external trigger signal.
+        :param int | str channel: Channel Name
+        :param float amplitude: Amplitude in V
+        :param float offset: Offset in V
+        :param sequence: Pulse Sequence
+        :param float n_samples: Number of Samples
+        :param str trigger_source: Trigger Source (EXT | INT)
+        :param str trigger_slope: Trigger Slope (POS | NEG)
+        :param int burst_cycles: Number of Cycles
+        :param str burst_mode: Mode TRIG
+        :param bool burst_state: Burst State
+        :param bool output_state: Output State
+        """
+        # TODO: express in sample rate with default of 6.25E7
+        channel = self._convert_channel(channel)
         arb_str, sample_rate = sequence.get_sequence_keysight_awg(n_samples)
 
-        self.write(f"SOUR{channel}:DATA:VOL:CLE")                       # clear memory
-        self.write(f"SOUR{channel}:DATA:ARB myArb, {arb_str}")          # set function
-        self.write(f"SOUR{channel}:FUNC:ARB myArb")                     # select to arb waveform
-        self.write(f"SOUR{channel}:FUNC ARB")                           # set to arb
-        self.write(f"SOUR{channel}:FUNC:ARB:FILT off")                  # set filter to off
-        self.write(f"SOUR{channel}:FUNC:ARB:SRAT {sample_rate}")          # set samplerate = (samples / period length)
-        self.write(f"SOUR{channel}:VOLT:HIGH {voltage_high}")           # set voltage high
-        self.write(f"SOUR{channel}:VOLT:LOW {voltage_low}")             # set voltage low
+        self.write(f"SOUR{channel}:DATA:VOL:CLE")
+        self.write(f"SOUR{channel}:DATA:ARB myArb, {arb_str}")
+        self.write(f"SOUR{channel}:FUNC:ARB myArb")
+        self.write(f"SOUR{channel}:FUNC ARB")
+        self.write(f"SOUR{channel}:FUNC:ARB:FILT off")
+        self.write(f"SOUR{channel}:FUNC:ARB:SRAT {sample_rate}")        # samplerate = (samples / period length)
+        self.write(f"SOUR{channel}:VOLT {amplitude}")
+        self.write(f"SOUR{channel}:VOLT:OFFS {offset}")
+        self.set_trigger(channel=channel, source=trigger_source, slope=trigger_slope)
+        self.set_burst_mode(channel=channel, number_cycles=burst_cycles, mode=burst_mode, state=burst_state)
+        self.set_output(channel=channel, state=output_state)
 
     def gui_open(self):
         """
         Open GUI
         """
-        self.app = WaveformKeysightDualWindow(self)
+        self._app = WaveformKeysightDualWindow(self)
 
 
 class WaveformKeysightDualWindow(QMainWindow):
@@ -524,11 +523,11 @@ class WaveformKeysightDualWindow(QMainWindow):
 
         # Output Buttons
         self._button_output_ch1 = ToggleButton(state=self._device.get_output(channel=1))
-        self._button_output_ch1.clicked.connect(
+        self._button_output_ch1.clicked.connect(    # NOQA
             lambda: self._device.set_output(channel=1, state=self._button_output_ch1.isChecked())
         )
         self._button_output_ch2 = ToggleButton(state=self._device.get_output(channel=2))
-        self._button_output_ch2.clicked.connect(
+        self._button_output_ch2.clicked.connect(    # NOQA
             lambda: self._device.set_output(channel=2, state=self._button_output_ch2.isChecked())
         )
 

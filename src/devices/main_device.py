@@ -93,7 +93,7 @@ class USBDevice:
     STOPBITS = serial.STOPBITS_ONE
     BYTESIZE = serial.EIGHTBITS
 
-    def __init__(self, name, address, settings):
+    def __init__(self, name="Unnamed Device", address="", settings=None):
         """
         Connect to Device
         :param str name: Name
@@ -191,7 +191,7 @@ class EthernetDevice:
     TERMINATION_WRITE = ''
     TERMINATION_READ = 1
 
-    def __init__(self, name, address, settings=None):
+    def __init__(self, name="Unnamed Device", address="", settings=None):
         """
         Connect to Device
         :param str name: Name

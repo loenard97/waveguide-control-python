@@ -4,6 +4,8 @@ IMPORTANT: Remember to also edit src/measurement/__init__.py if you add more uni
     Otherwise, you can't use these units in measurement scripts.
 """
 
+import numpy as np
+
 # Time
 ps = 1E-12
 ns = 1E-9
@@ -23,3 +25,7 @@ dBm = 1
 # Voltage
 mV = 1E-3
 V = 1
+
+# Angle
+rad = 1
+deg = 2*np.pi/360

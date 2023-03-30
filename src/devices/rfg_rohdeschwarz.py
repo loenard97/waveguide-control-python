@@ -171,10 +171,7 @@ class RFGRohdeSchwarz(EthernetDevice):
         :param bool state: Modulation State
         """
         self.write(f"SOUR{channel}:PULM:SOUR {source}")
-        if state:
-            self.write(f"SOUR{channel}:PULM:STAT ON")
-        else:
-            self.write(f"SOUR{channel}:PULM:STAT OFF")
+        self.write(f"SOUR{channel}:PULM:STAT {'ON' if state else 'OFF'}")
 
     def set_function_constant(self, channel=1, frequency=1000, amplitude=-30, output=False):
         """

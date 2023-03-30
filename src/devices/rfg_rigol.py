@@ -1,11 +1,14 @@
 """
 Radio Frequency Generator by Rigol
-The class is supposed to work with all R&S RFGs, but was only tested with the following versions:
+The class is supposed to work with all Rigol RFGs, but was only tested with the following versions:
  - DSG836A
 
 Manuals:
 https://beyondmeasure.rigoltech.com/acton/attachment/1579/f-063b/1/-/-/-/-/DSG800%20Programming%20Guide.pdf
 """
+import logging
+import sys
+
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QDoubleSpinBox, QVBoxLayout
 
@@ -15,6 +18,9 @@ from src.static_gui_elements.toggle_button import ToggleButton
 
 
 class RFGRigol(EthernetDevice):
+
+    # TERMINATION_WRITE = '\n'
+    # TERMINATION_READ = 1
 
     def get_identification(self):
         """
@@ -32,8 +38,10 @@ class RFGRigol(EthernetDevice):
         """
         Reset Device Settings
         """
+        self.write("*RST")
         self.write("SYST:PRES:TYPE FAC")
         self.write("SYST:PRES")
+        self.write("SYST:CLE")
 
     def soft_reset(self):
         self.reset()
@@ -78,6 +86,53 @@ class RFGRigol(EthernetDevice):
         Get RF Amplitude
         """
         return float(self.read("LEV?"))
+
+    def set_constant_mw(self, frequency=1_000_000.0, amplitude=-60.0, state=True):
+        """
+        Set constant MW Output
+        :param float frequency: Frequency in Hz
+        :param float amplitude: Amplitude in dBm
+        :param bool state: Output State
+        """
+        self.write("SOUR:MOD:STAT OFF")
+        self.set_frequency(frequency)
+        self.set_amplitude(amplitude)
+        self.set_output(state)
+
+    def set_pulse_modulation(self, source="EXT", inverted=False, state=True):
+        """
+        Set Pulse Modulation
+        :param str source: Source INT | EXT
+        :param bool inverted: Invert Signal
+        :param bool state: Output State
+        """
+        self.write(f"SOUR:PULM:SOUR {source}")
+        self.write(f"SOUR:PULM:POL {'INV' if inverted else 'NORM'}")
+        self.write(f"SOUR:PULM:STAT {'ON' if state else 'OFF'}")
+        self.write(f"SOUR:MOD:STAT {'ON' if state else 'OFF'}")
+
+    def set_am_modulation(self, source="EXT", state=True):
+        """
+        Set Amplitude Modulation
+        """
+        self.write(f"SOUR:AM:SOUR {source}")
+        self.write(f"SOUR:AM:STAT {'ON' if state else 'OFF'}")
+        self.write(f"SOUR:MOD:STAT {'ON' if state else 'OFF'}")
+
+    def set_iq_modulation(self, frequency=1_000_000.0, amplitude=-60.0, source="EXT", iq_state=True, output_state=True):
+        """
+        Set IQ Modulation.
+        Default settings use external I and Q inputs.
+        :param float frequency: Frequency in Hz
+        :param float amplitude: Amplitude in dBm
+        :param string source: IQ signal source EXT | INT
+        :param bool iq_state: IQ state
+        :param bool output_state: Output State
+        """
+        self.set_constant_mw(frequency=frequency, amplitude=amplitude, state=output_state)
+        self.write(f"SOUR:IQ:MOD {source}")
+        self.write(f"SOUR:IQ:MOD:STAT {'ON' if iq_state else 'OFF'}")
+        self.write(f"SOUR:MOD:STAT {'ON' if iq_state else  'OFF'}")
 
     def set_function_sweep(self, start_frequency, stop_frequency, start_amplitude, stop_amplitude, n_points, dwell_time,
                            state):
@@ -171,3 +226,33 @@ class RFGRigolWindow(QWidget):
     @pyqtSlot(bool)
     def _handle_button_output_clicked(self, state):
         self._device.set_output(state=state)
+
+def main():
+    logging.basicConfig(
+        level=20,
+        format="%(asctime)s: [%(levelname)s] - %(message)s",
+        handlers=[logging.StreamHandler(sys.stdout)],
+        force=True
+    )
+    rfg = RFGRigol(address="192.168.88.141")
+    # rfg.write(r"MMEM:MDIR D:\IQ")
+    # print(f"IDN: '{rfg.read('*IDN?')}'")
+    # print(f"CAT: '{rfg.read('MMEM:CAT? D:')}'")
+    # print(f"CAT LENG: '{rfg.read('MMEM:CAT:LENG? D:')}'")
+    rfg.write(":MMEM:DATA:IQ test1,0,2,#900000011 1,10,11,20")
+    # rfg.write(r"MMEM:DATA:IQ D:\IQ\TEST2,0,2,#9000000011 1,10,11,20")
+    # rfg.write(r"MMEM:SAV D:\SET.STA")
+    # print(f"ESE: '{rfg.read(':*ESE?')}'")
+    # print(f"ESR: '{rfg.read(':*ESR?')}'")
+    print(f"IQ List: '{rfg.read(':MMEM:DATA:IQ:LIST?')}'")
+    print(f"IQ Segment Info: '{rfg.read(':MMEM:DATA:IQ:SEGM:INFO?')}'")
+    print(f"IQ Segment List: '{rfg.read(':MMEM:DATA:IQ:SEGM:LIST?')}'")
+    print(f"IQ base state: '{rfg.read(':SOUR:IQ:BAS:STAT?')}'")
+    print(f"IQ mod state: '{rfg.read(':SOUR:IQ:MOD:STAT?')}'")
+    print(f"IQ mod: '{rfg.read(':SOUR:IQ:MOD?')}'")
+    # print(f"IQ Segment List: '{rfg.read(':MMEM:DATA:IQ:SEGM:LIST?')}'")
+    # rfg.write(r"MMEM:LOAD D:\TEST1.arb")
+
+
+if __name__ == '__main__':
+    main()

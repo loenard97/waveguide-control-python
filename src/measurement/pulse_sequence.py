@@ -1,4 +1,3 @@
-import numpy as np
 from dataclasses import dataclass
 
 from src.measurement.units import *
@@ -8,6 +7,10 @@ class Sequence:
     """
     Manage one Sequence of Pulses
     """
+    # The methods that return the sequence as a list for each device are always subject to floating point rounding
+    # errors, but the final sequence should at most be only one sample shorter than intended.
+    # So far I never had any problems with that. If that gets problematic at some point, maybe try to use the decimal
+    # library instead: https://docs.python.org/3/library/decimal.html
 
     def __init__(self, pulse_sequence):
         self.sequence = pulse_sequence
@@ -19,6 +22,8 @@ class Sequence:
         """
         Return Sequence as Array
         """
+        # Return sequence as numpy array for plotting purposes
+
         ret = np.array([])
         sample_rate = int(n_samples / self.length * 1E9)  # floored samples per s
         for pulse in self.sequence:
@@ -35,6 +40,10 @@ class Sequence:
         """
         Return Sequence in Pulse Streamer Format
         """
+        # PulseStreamer format is a list of tuples per pulse with length in ns and level:
+        # [(100, 0), (500, 1)] equals 100ns nothing, then 500ns pulse.
+        # Digital Outputs only allow 0 or 1 as level.
+
         ret_sequence = []
         for pulse in self.sequence:
             if isinstance(pulse, High):
@@ -50,70 +59,74 @@ class Sequence:
         Return Sequence in Keysight AWG Format
         :returns (str, int): Sequence as String and Number of Samples per seconds
         """
-        # Always subject to floating point rounding errors, but final sequence should at most be only one Sample
-        # shorter than intended
-        ret = ""
+        # Keysight AWG format is one string with values from 0 to 1 like this:
+        # "0, 0, 0, 0.1, 0.5, 0.6, 1, 1, 1, 0, 0, 0"
+        # This string has to have a minimal length that is not checked for here, because it usually isn't problematic
+
         sample_rate = int(n_samples/self.length*1E9)   # floored samples per s
-        for pulse in self.sequence:
-            if isinstance(pulse, High):
-                ret += "1, " * int(pulse.length * sample_rate)
-            elif isinstance(pulse, Low):
-                ret += "0, " * int(pulse.length * sample_rate)
-            else:
-                raise ValueError("Unknown Pulse Shape")
-        return ret[:-2], sample_rate
+        ret = ', '.join([f"{pulse.level:.4f}" for pulse in self.sequence for _ in range(int(pulse.length*sample_rate))])
+        return ret, sample_rate
 
 
+@dataclass
 class On:
     """
     Pulse Sequence that is always High
     """
+    level: float = 1.0
+    length: float = 1*us
 
-    @classmethod
-    def get_sequence_pulse_streamer(cls):
+    def get_sequence_pulse_streamer(self):
         """
         Return Sequence in Pulse Streamer Format
         """
-        return [(1E3, 1)]
+        return [(int(self.length*1E9), 1)]
 
 
+@dataclass
 class Off:
     """
     Pulse Sequence that is always Low
     """
+    level: float = 0.0
+    length: float = 1*us
 
-    @classmethod
-    def get_sequence_pulse_streamer(cls):
+    def get_sequence_pulse_streamer(self):
         """
         Return Sequence in Pulse Streamer Format
         """
-        return [(1E3, 0)]
+        return [(int(self.length*1E9), 0)]
 
 
+@dataclass
 class Trigger:
     """
     Pulse Sequence for one Trigger Pulse
     """
+    level: float = 1.0
+    length: float = 1*us
+    offset: float = 0.0
 
-    @classmethod
-    def get_sequence_pulse_streamer(cls):
+    def get_sequence_pulse_streamer(self):
         """
         Return Sequence in Pulse Streamer Format
         """
-        return [(1E3, 1), (1E3, 0)]
+        return [(int(self.offset*1E9), 0), (int(self.length*1E9), 1), (1E2, 0)]
 
 
-@dataclass(repr=True, frozen=True)
+@dataclass
 class High:
     """
     Rectangle Pulse with Level 1
     """
-    length: float
+    length: float = 1*us
+    level: float = 1.0
 
 
-@dataclass(repr=True, frozen=True)
+@dataclass
 class Low:
     """
     Rectangle Pulse with Level 0
     """
-    length: float
+    length: float = 1*us
+    level: float = 0.0

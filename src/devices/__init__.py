@@ -11,6 +11,7 @@ from .pulsestreamer_swabian import PulsestreamerSwabian
 from .redpitaya_pulsecounter import RedPitayaPulsecounter
 from .rfg_windfreak import RFGWindfreak
 from .rfg_rohdeschwarz import RFGRohdeSchwarz
+from .rfg_rigol import RFGRigol
 from .slider_thorlabs import SliderThorlabs
 from .stage_conex import StageConex
 from .stage_thorlabs import StageThorlabs
@@ -18,5 +19,5 @@ from .timetagger_swabian import TimetaggerSwabian
 __all__ = [
     "AWGKeysight", "CameraAndor", "CameraThorlabs", "CameraXimea", "LaserDLNSEC", "LaserOBIS",  "OscilloscopeKeysight",
     "PowersupplyVoltcraft", "PulsestreamerStanford", "PulsestreamerSwabian", "RedPitayaPulsecounter", "RFGWindfreak",
-    "RFGRohdeSchwarz", "SliderThorlabs", "StageConex", "StageThorlabs", "TimetaggerSwabian"
+    "RFGRohdeSchwarz", "RFGRigol", "SliderThorlabs", "StageConex", "StageThorlabs", "TimetaggerSwabian"
 ]
