@@ -54,18 +54,16 @@ class Sequence:
                 raise ValueError("Unknown Pulse Shape")
         return ret_sequence
 
-    def get_sequence_keysight_awg(self, n_samples=1000) -> (str, int):
+    def get_sequence_keysight_awg(self, sample_rate) -> str:
         """
         Return Sequence in Keysight AWG Format
-        :returns (str, int): Sequence as String and Number of Samples per seconds
+        :param float sample_rate: Sample Rate in Samples per Second
         """
         # Keysight AWG format is one string with values from 0 to 1 like this:
         # "0, 0, 0, 0.1, 0.5, 0.6, 1, 1, 1, 0, 0, 0"
         # This string has to have a minimal length that is not checked for here, because it usually isn't problematic
 
-        sample_rate = int(n_samples/self.length*1E9)   # floored samples per s
-        ret = ', '.join([f"{pulse.level:.4f}" for pulse in self.sequence for _ in range(int(pulse.length*sample_rate))])
-        return ret, sample_rate
+        return ', '.join([f"{pulse.level:.4f}" for pulse in self.sequence for _ in range(int(pulse.length*sample_rate))])
 
 
 @dataclass

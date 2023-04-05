@@ -8,7 +8,7 @@ class Device:
     Device Interface
     """
 
-    def __int__(self, name: str, address: str, settings=None):
+    def __init__(self, name: str, address: str, settings=None):
         """
         Connect to Device
         :param str name: Name of Device
@@ -17,8 +17,7 @@ class Device:
         """
         self._ser = None        # Serial Object handling the Communication
         self._app = None        # Qt Widget shown when open_gui() is called
-        if settings is None:
-            self.settings = {}
+        self.settings = settings if settings is not None else {}
         self.name = name
         self.address = address
 
@@ -100,8 +99,7 @@ class USBDevice:
         :param str address: COM Port on Windows, File Name on Linux
         """
         self._app = None        # Qt Widget shown when open_gui() is called
-        if settings is None:
-            self.settings = {}
+        self.settings = settings if settings is not None else {}
         self.name = name
         self.address = address
         try:
@@ -198,8 +196,7 @@ class EthernetDevice:
         :param str address: IP Address
         """
         self._app = None        # Qt Widget shown when open_gui() is called
-        if settings is None:
-            self.settings = {}
+        self.settings = settings if settings is not None else {}
         self.name = name
         self.address = address
         try:

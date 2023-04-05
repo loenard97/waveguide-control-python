@@ -17,16 +17,19 @@ class AWGKeysight(EthernetDevice):
 
     def __init__(self, name="AWG Keysight", address="", settings=None):
         super().__init__(name, address, settings)
-        if settings is None:
-            self.settings = {}
-        else:
-            self.settings = settings
 
         # Channel Names
         self.channel = ["1", "2"]
         if "Channel" in self.settings:
             for name, value in self.settings["Channel"].items():
                 self.channel[name - 1] = value
+
+        # Set maximum sample rate for arbitrary functions
+        model_nr = self.get_identification().split(',')[1]
+        if model_nr == "33622A":
+            self.MAX_SRAT = 250E6
+        else:
+            self.MAX_SRAT = 62.5E6
 
     def get_error(self) -> None | str:
         """
@@ -47,13 +50,6 @@ class AWGKeysight(EthernetDevice):
         if isinstance(channel, str) and channel in self.channel:
             return self.channel.index(channel) + 1
         raise ValueError(f"{self.name}: Unknown Channel '{channel}'")
-
-    @staticmethod
-    def _convert_decimal_notation(value):
-        """
-        Convert Decimal Notation
-        """
-        return value.replace(",", ".")
 
     def get_identification(self):
         """
@@ -99,10 +95,7 @@ class AWGKeysight(EthernetDevice):
         """
         Get Output of channel 1|2
         """
-        out = self.read(f"OUTP{channel}?")
-        if out == '1':
-            return True
-        return False
+        return self.read(f"OUTP{channel}?") == "1"
 
     def set_function(self, channel, function):
         """
@@ -120,8 +113,6 @@ class AWGKeysight(EthernetDevice):
         """
         Set Frequency in Hz
         """
-        if isinstance(frequency, str):
-            frequency = frequency.replace(',', '.')
         self.write(f"SOUR{channel}:FREQ {frequency}")
 
     def get_frequency(self, channel):
@@ -134,8 +125,6 @@ class AWGKeysight(EthernetDevice):
         """
         Set Amplitude in V
         """
-        if isinstance(amplitude, str):
-            amplitude = amplitude.replace(',', '.')
         self.write(f"SOUR{channel}:VOLT {amplitude}")
 
     def get_amplitude(self, channel):
@@ -148,8 +137,6 @@ class AWGKeysight(EthernetDevice):
         """
         Set Offset in V
         """
-        if isinstance(offset, str):
-            offset = offset.replace(',', '.')
         self.write(f"SOUR{channel}:VOLT:OFFS {offset}")
 
     def get_offset(self, channel) -> float:
@@ -162,8 +149,6 @@ class AWGKeysight(EthernetDevice):
         """
         Set Phase in °
         """
-        if isinstance(phase, str):
-            phase = phase.replace(',', '.')
         self.write(f"SOUR{channel}:PHAS {phase}")
 
     def get_phase(self, channel) -> float:
@@ -345,16 +330,6 @@ class AWGKeysight(EthernetDevice):
         """
         return float(self.read(f"SOUR{channel}:BURS:NCYC?"))
 
-    # TODO: rename
-    # def set_burst_mode(self, channel, mode):
-    #     """
-    #     Set Burst Mode TRIG | GAT
-    #     """
-    #     if mode.upper() in ["TRIG", "GAT"]:
-    #         self.write(f"SOUR{channel}:BURS:MODE {mode.upper()}")
-    #     else:
-    #         raise ValueError("Burst Mode has to be 'TRIG' or 'GAT'")
-
     def get_burst_mode(self, channel):
         """
         Get Burst Mode
@@ -426,7 +401,7 @@ class AWGKeysight(EthernetDevice):
         self.write(f"SOUR{channel}:FUNC:PULS:HOLD DCYC")
 
     def set_function_arbitrary(
-            self, channel=1, amplitude=1.0, offset=0.0, sequence=None, n_samples=1000,
+            self, channel=1, amplitude=1.0, offset=0.0, sequence=None, sample_rate=None,
             trigger_source="EXT", trigger_slope="POS",
             burst_cycles=1, burst_mode="TRIG", burst_state=True,
             output_state=True):
@@ -437,7 +412,8 @@ class AWGKeysight(EthernetDevice):
         :param float amplitude: Amplitude in V
         :param float offset: Offset in V
         :param sequence: Pulse Sequence
-        :param float n_samples: Number of Samples
+        :param float sample_rate: Sample Rate in Samples per Second. Default is maximum possible sample rate and depends
+            on the specific Model and Version of the AWG.
         :param str trigger_source: Trigger Source (EXT | INT)
         :param str trigger_slope: Trigger Slope (POS | NEG)
         :param int burst_cycles: Number of Cycles
@@ -445,16 +421,17 @@ class AWGKeysight(EthernetDevice):
         :param bool burst_state: Burst State
         :param bool output_state: Output State
         """
-        # TODO: express in sample rate with default of 6.25E7
         channel = self._convert_channel(channel)
-        arb_str, sample_rate = sequence.get_sequence_keysight_awg(n_samples)
+        if sample_rate is None:
+            sample_rate = self.MAX_SRAT
+        arb_str = sequence.get_sequence_keysight_awg(sample_rate)
 
         self.write(f"SOUR{channel}:DATA:VOL:CLE")
         self.write(f"SOUR{channel}:DATA:ARB myArb, {arb_str}")
         self.write(f"SOUR{channel}:FUNC:ARB myArb")
         self.write(f"SOUR{channel}:FUNC ARB")
-        self.write(f"SOUR{channel}:FUNC:ARB:FILT off")
-        self.write(f"SOUR{channel}:FUNC:ARB:SRAT {sample_rate}")        # samplerate = (samples / period length)
+        self.write(f"SOUR{channel}:FUNC:ARB:FILT OFF")
+        self.write(f"SOUR{channel}:FUNC:ARB:SRAT {sample_rate}")
         self.write(f"SOUR{channel}:VOLT {amplitude}")
         self.write(f"SOUR{channel}:VOLT:OFFS {offset}")
         self.set_trigger(channel=channel, source=trigger_source, slope=trigger_slope)
@@ -591,26 +568,26 @@ class WaveformKeysightDualWindow(QMainWindow):
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
-                lambda: self._device.set_frequency(channel, line_edit_frequency.text()))
+                lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
             line_edit_amplitude = QDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
-                lambda: self._device.set_amplitude(channel, line_edit_amplitude.text()))
+                lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
             line_edit_offset = QDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
-            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.text()))  # NOQA
+            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
             line_edit_phase = QDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
-            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.text()))  # NOQA
+            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.value()))  # NOQA
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
 
         elif waveform == "SQU":
@@ -619,33 +596,33 @@ class WaveformKeysightDualWindow(QMainWindow):
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
-                lambda: self._device.set_frequency(channel, line_edit_frequency.text()))
+                lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
             line_edit_amplitude = QDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
-                lambda: self._device.set_amplitude(channel, line_edit_amplitude.text()))
+                lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
             line_edit_offset = QDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
-            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.text()))  # NOQA
+            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
             line_edit_phase = QDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
-            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.text()))  # NOQA
+            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.value()))  # NOQA
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
             line_edit_duty_cycle = QDoubleSpinBox()
             line_edit_duty_cycle.setDecimals(2)
             line_edit_duty_cycle.setRange(0.05, 99.95)
             line_edit_duty_cycle.setValue(self._device.get_square_duty_cycle(channel))
             line_edit_duty_cycle.textChanged.connect(  # NOQA
-                lambda: self._device.set_square_duty_cycle(channel, line_edit_duty_cycle.text()))
+                lambda: self._device.set_square_duty_cycle(channel, line_edit_duty_cycle.value()))
             layout_new.addRow(QLabel("Duty Cycle / %"), line_edit_duty_cycle)
 
         elif waveform == "TRI":
@@ -654,26 +631,26 @@ class WaveformKeysightDualWindow(QMainWindow):
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
-                lambda: self._device.set_frequency(channel, line_edit_frequency.text()))
+                lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
             line_edit_amplitude = QDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
-                lambda: self._device.set_amplitude(channel, line_edit_amplitude.text()))
+                lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
             line_edit_offset = QDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
-            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.text()))  # NOQA
+            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
             line_edit_phase = QDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
-            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.text()))  # NOQA
+            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.value()))  # NOQA
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
 
         elif waveform == "RAMP":
@@ -682,33 +659,33 @@ class WaveformKeysightDualWindow(QMainWindow):
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
-                lambda: self._device.set_frequency(channel, line_edit_frequency.text()))
+                lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
             line_edit_amplitude = QDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
-                lambda: self._device.set_amplitude(channel, line_edit_amplitude.text()))
+                lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
             line_edit_offset = QDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
-            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.text()))  # NOQA
+            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
             line_edit_phase = QDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
-            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.text()))  # NOQA
+            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.value()))  # NOQA
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
             line_edit_symmetry = QDoubleSpinBox()
             line_edit_symmetry.setDecimals(2)
             line_edit_symmetry.setRange(0, 100)
             line_edit_symmetry.setValue(self._device.get_ramp_symmetry(channel))
             line_edit_symmetry.textChanged.connect(  # NOQA
-                lambda: self._device.set_ramp_symmetry(channel, line_edit_symmetry.text()))
+                lambda: self._device.set_ramp_symmetry(channel, line_edit_symmetry.value()))
             layout_new.addRow(QLabel("Symmetry / %"), line_edit_symmetry)
 
         elif waveform == "PULS":
@@ -717,46 +694,46 @@ class WaveformKeysightDualWindow(QMainWindow):
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
-                lambda: self._device.set_frequency(channel, line_edit_frequency.text()))
+                lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
             line_edit_amplitude = QDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
-                lambda: self._device.set_amplitude(channel, line_edit_amplitude.text()))
+                lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
             line_edit_offset = QDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
-            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.text()))  # NOQA
+            line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
             line_edit_phase = QDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
-            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.text()))  # NOQA
+            line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.value()))  # NOQA
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
             line_edit_width = QDoubleSpinBox()
             line_edit_width.setDecimals(9)
             line_edit_width.setRange(5e-9, 1e6)
             line_edit_width.setValue(self._device.get_pulse_width(channel))
-            line_edit_width.textChanged.connect(lambda: self._device.set_pulse_width(channel, line_edit_width.text()))  # NOQA
+            line_edit_width.textChanged.connect(lambda: self._device.set_pulse_width(channel, line_edit_width.value()))  # NOQA
             layout_new.addRow(QLabel("Width / s"), line_edit_width)
             line_edit_lead_edge = QDoubleSpinBox()
             line_edit_lead_edge.setDecimals(9)
             line_edit_lead_edge.setRange(3e-9, 1e6)
             line_edit_lead_edge.setValue(self._device.get_pulse_lead_edge(channel))
             line_edit_lead_edge.textChanged.connect(  # NOQA
-                lambda: self._device.set_pulse_lead_edge(channel, line_edit_lead_edge.text()))
+                lambda: self._device.set_pulse_lead_edge(channel, line_edit_lead_edge.value()))
             layout_new.addRow(QLabel("Lead Edge / s"), line_edit_lead_edge)
             line_edit_trail_edge = QDoubleSpinBox()
             line_edit_trail_edge.setDecimals(9)
             line_edit_trail_edge.setRange(3e-9, 1e6)
             line_edit_trail_edge.setValue(self._device.get_pulse_trail_edge(channel))
             line_edit_trail_edge.textChanged.connect(  # NOQA
-                lambda: self._device.set_pulse_trail_edge(channel, line_edit_trail_edge.text()))
+                lambda: self._device.set_pulse_trail_edge(channel, line_edit_trail_edge.value()))
             layout_new.addRow(QLabel("Trail Edge / s"), line_edit_trail_edge)
 
         elif waveform == "PRBS":
@@ -774,7 +751,7 @@ class WaveformKeysightDualWindow(QMainWindow):
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
             line_edit_offset.textChanged.connect(  # NOQA
-                lambda: self._device.set_offset(channel, offset=line_edit_offset.text()))
+                lambda: self._device.set_offset(channel, offset=line_edit_offset.value()))
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
 
         # Replace old Widget
