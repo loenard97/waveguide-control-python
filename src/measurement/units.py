@@ -26,6 +26,10 @@ dBm = 1
 mV = 1E-3
 V = 1
 
+# Current
+mA = 1E-3
+A = 1
+
 # Angle
 rad = 1
 deg = 2*np.pi/360

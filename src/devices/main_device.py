@@ -131,12 +131,6 @@ class USBDevice:
         """
         raise NotImplementedError
 
-    def soft_reset(self):
-        """
-        Reset Device but keep initial Settings
-        """
-        raise NotImplementedError
-
     def write(self, message="", error_checking=True):
         """
         Write Message to Device
@@ -161,9 +155,11 @@ class USBDevice:
         :return: Received Answer
         :raises ConnectionError: Connection failed or Device Error occurred
         """
+        self._ser.read()    # clear input buffer
         self.write(message)
         try:
-            ret = self._ser.readline().decode()[:-self.TERMINATION_READ]
+            # ret = self._ser.readline().decode()[:-self.TERMINATION_READ]
+            ret = self._ser.readline().decode().strip()
         except Exception as err:
             raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{err}'.")
         else:

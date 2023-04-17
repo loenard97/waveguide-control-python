@@ -4,5 +4,5 @@ from .units import *
 __all__ = [
     "DataType", "Measurement",
     "On", "Off", "Trigger", "High", "Low",
-    "ps", "ns", "us", "ms", "s", "Hz", "kHz", "MHz", "GHz", "dBm", "mV", "V", "rad", "deg"
+    "ps", "ns", "us", "ms", "s", "Hz", "kHz", "MHz", "GHz", "dBm", "mV", "V", "mA", "A", "rad", "deg"
 ]
