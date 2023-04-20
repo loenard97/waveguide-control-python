@@ -13,12 +13,10 @@ except OSError:
 
 
 class CameraXimea:
-    NAME = "Ximea Camera"
-    ADDRESS_DEFAULT = ''
-    app = None
 
-    def __init__(self, address=ADDRESS_DEFAULT):
-        self.address = address
+    NAME = "Ximea Camera"
+
+    def __init__(self):
         self._ser = xiapi.Camera()
         self._img = xiapi.Image()
         self._last_picture = None

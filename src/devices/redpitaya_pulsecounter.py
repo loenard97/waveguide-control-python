@@ -70,7 +70,7 @@ class RedPitayaPulsecounter(QObject):
         packed_bytes = self._socket.read(self._socket.bytesAvailable())
 
         self._unpacker.feed(packed_bytes)
-        last_message = None
+        last_message = ""
         for message in self._unpacker:
             logging.debug(f"{self.NAME}: Recv Message '{message}'")
             last_message = message
@@ -101,8 +101,7 @@ class RedPitayaPulsecounter(QObject):
         """
         Get current Value of Counter
         """
-        _, value = self.read("read_reg", self._registers[f"cnt_{counter}_value"])
-        return int(value)
+        return int(self.read("read_reg", self._registers[f"cnt_{counter}_value"]))
 
     def reset_counter(self, counter):
         """

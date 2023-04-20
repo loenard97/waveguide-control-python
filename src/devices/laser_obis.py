@@ -17,7 +17,7 @@ class LaserOBIS(USBDevice):
     TERMINATION_WRITE = "\r\n"
     TERMINATION_READ = 2
 
-    def write(self, message: str, error_checking=False):
+    def write(self, message: str = "", error_checking: bool = False) -> None:
         """
         Write Message to Device
         :param str message: Message to send
@@ -27,7 +27,7 @@ class LaserOBIS(USBDevice):
         super().write(message, error_checking=error_checking)
         self._ser.readline()
 
-    def read(self, message: str, error_checking=False) -> str:
+    def read(self, message: str = "", error_checking: bool = False) -> str:
         """
         Read Message from Device
         :param str message: Message to query

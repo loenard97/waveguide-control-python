@@ -19,7 +19,7 @@ class Sequence:
         for pulse in self.sequence:
             self.length += int(pulse.length * 1E9)
 
-    def get_sequence_list(self, n_samples=5000) -> np.array:
+    def get_sequence_list(self, n_samples=5000):
         """
         Return Sequence as Array
         """

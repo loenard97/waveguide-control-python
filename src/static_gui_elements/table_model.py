@@ -3,7 +3,7 @@ Children of QAbstractTableModel
 """
 
 from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox, QWidget
 
 
 class TableModel(QAbstractTableModel):
@@ -81,7 +81,7 @@ class TableModel(QAbstractTableModel):
             self._data[index.row()][index.column()] = self._data_types[index.column()](value)
         except ValueError:
             QMessageBox.critical(
-                None, "Type Error", f"Could not convert Input to Type '{self._data_types[index.column()]}'")    # NOQA
+                QWidget(), "Type Error", f"Could not convert Input to Type '{self._data_types[index.column()]}'")    # NOQA
         self.dataChanged.emit(index, index)    # NOQA
         return True
 

@@ -26,20 +26,20 @@ class DataType(Enum):
 class Measurement:
 
     name = "Name not defined"
-    parameters = []
+    parameters: list[str] = []
 
     def __init__(self, main_window, devices_dict: dict):
         self._main_window = main_window
 
-        self.iterators_list = []
+        self.iterators_list: list = []
         self.number_points = 1
-        self.parameters_dict = {}
-        self.pulse_sequence = {}
-        self.observables = {}
+        self.parameters_dict: dict = {}
+        self.pulse_sequence: dict = {}
+        self.observables: dict = {}
         self.current_point = 0
         self.flag_stop = False
-        self.save_file_path = None
-        self.timestamps = None
+        self.save_file_path = ""
+        self.timestamps: list = []
 
         # Setup Devices as Attributes
         self.devices = {}
@@ -117,7 +117,7 @@ class Measurement:
                 f"in Script '{file}' at Line {line_number} during:\n"
                 f"{line}")
 
-    def iterate_measurement(self, var_dict: dict, iterators_array: list, index: int):
+    def iterate_measurement(self, var_dict: dict, iterators_array: list, index: int) -> None:
         """
         Recursively start one Loop for every Iterator
         """
@@ -154,7 +154,9 @@ class Measurement:
                 self._main_window.tab_measurement.redraw_plots()
                 self.current_point += 1
 
-    def add_observable(self, name: str, data_type=DataType.Number, save=True, plot=True, plot_color="green"):
+    def add_observable(
+            self, name: str, data_type: DataType = DataType.Number, save: bool = True, plot: bool = True,
+            plot_color: str = "green") -> None:
         """
         Add new Observable
         :param str name: Name of Observable
@@ -307,3 +309,7 @@ class Measurement:
                 continue
 
         return file, line, line_number
+
+    # TODO: extend with ABCs
+    def run_measurement(self, parameters):
+        pass
