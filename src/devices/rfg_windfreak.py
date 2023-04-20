@@ -200,7 +200,7 @@ class RFGWindfreak(USBDevice):
         Get PLL charge pump current
         """
         self.set_channel(channel)
-        return self.read(f"U?")
+        return self.read("U?")
 
     def set_clock_reference(self, state=0):
         """

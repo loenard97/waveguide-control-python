@@ -9,7 +9,7 @@ from src.devices.main_device import USBDevice
 class SliderThorlabs(USBDevice):
     NAME = "Thorlabs Slider"
     ICON = "stage"
-    TIMEOUT = 0.5
+    TIMEOUT = 1
     TERMINATION_READ = 2
 
     def __init__(self, address):

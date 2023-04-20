@@ -12,7 +12,7 @@ from src.static_functions.wait import event_loop_interrupt
 
 
 class StageConex(USBDevice):
-    
+
     BAUDRATE = 921600
     TERMINATION_WRITE = '\r\n'
     TERMINATION_READ = 2

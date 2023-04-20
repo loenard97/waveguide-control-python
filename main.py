@@ -1,3 +1,12 @@
+"""
+Waveguide Team, AG Widera, TU Kaiserslautern, Germany
+GUI for Experiment Setup.
+See README.md for more details.
+
+Author: Waveguide Team, AG Widera, TU Kaiserslautern, Germany
+License: The Open Software License 3.0 (OSL-3.0)
+"""
+
 import os
 import sys
 import logging

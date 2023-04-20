@@ -6,8 +6,6 @@ The class is supposed to work with all Rigol RFGs, but was only tested with the 
 Manuals:
 https://beyondmeasure.rigoltech.com/acton/attachment/1579/f-063b/1/-/-/-/-/DSG800%20Programming%20Guide.pdf
 """
-import logging
-import sys
 
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QDoubleSpinBox, QVBoxLayout
@@ -153,7 +151,7 @@ class RFGRigol(EthernetDevice):
         self.write(f"SWE:STEP:STOP:LEV {stop_amplitude}")
         self.write(f"SWE:STEP:POIN {n_points}")
         self.write(f"SWE:STEP:DWEL {dwell_time}s")
-        self.write(f"SWE:STAT LEV,FREQ")
+        self.write("SWE:STAT LEV,FREQ")
         self.set_output(state=state)
 
     def get_iq_data_list(self):
@@ -226,33 +224,3 @@ class RFGRigolWindow(QWidget):
     @pyqtSlot(bool)
     def _handle_button_output_clicked(self, state):
         self._device.set_output(state=state)
-
-def main():
-    logging.basicConfig(
-        level=20,
-        format="%(asctime)s: [%(levelname)s] - %(message)s",
-        handlers=[logging.StreamHandler(sys.stdout)],
-        force=True
-    )
-    rfg = RFGRigol(address="192.168.88.141")
-    # rfg.write(r"MMEM:MDIR D:\IQ")
-    # print(f"IDN: '{rfg.read('*IDN?')}'")
-    # print(f"CAT: '{rfg.read('MMEM:CAT? D:')}'")
-    # print(f"CAT LENG: '{rfg.read('MMEM:CAT:LENG? D:')}'")
-    rfg.write(":MMEM:DATA:IQ test1,0,2,#900000011 1,10,11,20")
-    # rfg.write(r"MMEM:DATA:IQ D:\IQ\TEST2,0,2,#9000000011 1,10,11,20")
-    # rfg.write(r"MMEM:SAV D:\SET.STA")
-    # print(f"ESE: '{rfg.read(':*ESE?')}'")
-    # print(f"ESR: '{rfg.read(':*ESR?')}'")
-    print(f"IQ List: '{rfg.read(':MMEM:DATA:IQ:LIST?')}'")
-    print(f"IQ Segment Info: '{rfg.read(':MMEM:DATA:IQ:SEGM:INFO?')}'")
-    print(f"IQ Segment List: '{rfg.read(':MMEM:DATA:IQ:SEGM:LIST?')}'")
-    print(f"IQ base state: '{rfg.read(':SOUR:IQ:BAS:STAT?')}'")
-    print(f"IQ mod state: '{rfg.read(':SOUR:IQ:MOD:STAT?')}'")
-    print(f"IQ mod: '{rfg.read(':SOUR:IQ:MOD?')}'")
-    # print(f"IQ Segment List: '{rfg.read(':MMEM:DATA:IQ:SEGM:LIST?')}'")
-    # rfg.write(r"MMEM:LOAD D:\TEST1.arb")
-
-
-if __name__ == '__main__':
-    main()

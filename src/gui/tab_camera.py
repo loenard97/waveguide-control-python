@@ -249,7 +249,7 @@ class CameraTab(QWidget):
         Take Camera Picture and plot it
         """
         # Take Picture
-        logging.info(f"Tab Camera: Taking Picture")
+        logging.info("Tab Camera: Taking Picture")
         try:
             image_data = self._main_window.devices["cam"].take_picture()
         except AttributeError:
@@ -300,7 +300,6 @@ class CameraTab(QWidget):
         self._line_edit_roi_size.setValue(size_x)
 
         logging.info(f"Tab Camera: Set ROI to Pos: 'x={pos_x}, y={pos_y}', Size: 'x={size_x}, y={size_y}'")
-
 
     def _handle_picture_mouse_click(self, event):
         """
@@ -398,7 +397,7 @@ class CameraTab(QWidget):
 
         else:
             # Throw Warning if Stages not connected
-            logging.error(f"Tab Camera: Could not move Stage. One or more Stages are not connected.")
+            logging.error("Tab Camera: Could not move Stage. One or more Stages are not connected.")
             QMessageBox.critical(self._main_window, "Error", "Could not move Stage. One or more Stages are not "
                                                              "connected.")
             return
@@ -442,20 +441,14 @@ class CameraTab(QWidget):
         self._table_model.appendRow(["Empty Name", x, y, z])
         self._save_settings()
 
-    def _get_selected_rows(self) -> list:
+    def _get_selected_rows(self) -> list[int]:
         """
-        Return List of selected Rows (ordered and no duplicates)
+        Return List of selected Rows (reverse order and no duplicates)
         """
-        rows = []
-        rows_sorted = []
-        for e in self._table_view.selectionModel().selectedRows():
-            rows.append(e.row())                                                    # get all rows of selected rows
-        for e in self._table_view.selectionModel().selectedIndexes():
-            rows.append(e.row())                                                    # get all rows of selected items
-        [rows_sorted.append(x) for x in rows if x not in rows_sorted]               # remove duplicates
-        rows_sorted.sort(reverse=True)                                              # sort list
-        print(rows_sorted)
-        return rows_sorted
+        rows = set()
+        rows.update([e.row() for e in self._table_view.selectionModel().selectedRows()])
+        rows.update([e.row() for e in self._table_view.selectionModel().selectedIndexes()])
+        return sorted(rows, reverse=True)
 
     @pyqtSlot()
     def _handle_button_move_position(self):

@@ -47,7 +47,7 @@ class PulsestreamerStanford(EthernetDevice):
         trigger a pulse sequence
         """
         self.write("*TRG")
-    
+
     def get_operation_complete(self):
         """
         Returns 1 if all operations are complete
@@ -149,11 +149,11 @@ class PulsestreamerStanford(EthernetDevice):
         :param period:          length of sequence in s
         """
         if state:
-            self.write(f"BURM 1")
+            self.write("BURM 1")
             self.write(f"BURC {int(number_cycles)}")
             self.write(f"BURP {period}")
         else:
-            self.write(f"BURM 0")
+            self.write("BURM 0")
 
     def set_pulse(self, channel=1, amplitude=1.0, offset=0.0, t_start=0.0, t_stop=0.1, inverted=False):
         """

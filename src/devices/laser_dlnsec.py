@@ -54,7 +54,7 @@ class LaserDLNSEC(USBDevice):
         """
         Get Power in %
         """
-        return int(self.read(f"PWR?"))
+        return int(self.read("PWR?"))
 
     def set_mode(self, mode):
         """

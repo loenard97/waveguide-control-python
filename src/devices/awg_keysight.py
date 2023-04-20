@@ -139,7 +139,7 @@ class AWGKeysight(EthernetDevice):
         """
         self.write(f"SOUR{channel}:VOLT:OFFS {offset}")
 
-    def get_offset(self, channel) -> float:
+    def get_offset(self, channel: int) -> float:
         """
         Get Offset in V
         """
@@ -151,7 +151,7 @@ class AWGKeysight(EthernetDevice):
         """
         self.write(f"SOUR{channel}:PHAS {phase}")
 
-    def get_phase(self, channel) -> float:
+    def get_phase(self, channel: int) -> float:
         """
         Get Phase in °
         """

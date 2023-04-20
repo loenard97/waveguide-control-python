@@ -21,7 +21,7 @@ class Device:
         self.name = name
         self.address = address
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """
         Disconnect from Device
         """
@@ -35,19 +35,19 @@ class Device:
         """
         raise NotImplementedError
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset Device to default Settings
         """
         raise NotImplementedError
 
-    def soft_reset(self):
+    def soft_reset(self) -> None:
         """
         Reset Device but keep initial Settings
         """
         raise NotImplementedError
 
-    def write(self, message="", error_checking=True):
+    def write(self, message: str = "", error_checking: bool = True) -> None:
         """
         Write Message to Device
         Each written message should be logged via logging.info(f"{self.name}: Send '{message}'")
@@ -58,7 +58,7 @@ class Device:
         """
         raise NotImplementedError
 
-    def read(self, message="", error_checking=True) -> str:
+    def read(self, message: str = "", error_checking: bool = True) -> str:
         """
         Read Message from Device
         Each received message should be logged via logging.info(f"{self.name}: Recv '{message}'")
@@ -70,7 +70,7 @@ class Device:
         """
         raise NotImplementedError
 
-    def open_gui(self):
+    def open_gui(self) -> None:
         """
         Open GUI of Device
         """
@@ -110,7 +110,7 @@ class USBDevice:
         if not self._ser.isOpen():
             self._ser.open()
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """
         Disconnect from Device
         """
@@ -125,13 +125,13 @@ class USBDevice:
         """
         raise NotImplementedError
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset Device to default Settings
         """
         raise NotImplementedError
 
-    def write(self, message="", error_checking=True):
+    def write(self, message: str = "", error_checking: bool = True) -> None:
         """
         Write Message to Device
         :param str message: Message to send
@@ -147,7 +147,7 @@ class USBDevice:
                 raise ConnectionError(f"{self.name}: Could not write '{message}'. Error: '{self.get_error()}'.")
             logging.info(f"{self.name}: Send '{message}'.")
 
-    def read(self, message="", error_checking=True) -> str:
+    def read(self, message: str = "", error_checking: bool = True) -> str:
         """
         Read Message from Device
         :param str message: Message to query
@@ -168,7 +168,7 @@ class USBDevice:
             logging.info(f"{self.name}: Recv '{ret}'.")
             return ret
 
-    def open_gui(self):
+    def open_gui(self) -> None:
         """
         Open GUI of Device
         """
@@ -201,7 +201,7 @@ class EthernetDevice:
         except pyvisa.errors.VisaIOError as err:
             raise ConnectionError(f"{self.name}: Could not connect. Error: '{err}'.")
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """
         Disconnect from Device
         """
@@ -216,19 +216,19 @@ class EthernetDevice:
         """
         raise NotImplementedError
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset Device to default Settings
         """
         raise NotImplementedError
 
-    def soft_reset(self):
+    def soft_reset(self) -> None:
         """
         Reset Device but keep initial Settings
         """
         raise NotImplementedError
 
-    def write(self, message="", error_checking=True):
+    def write(self, message: str = "", error_checking: bool = True) -> None:
         """
         Write Message to Device
         :param str message: Message to send
@@ -241,12 +241,12 @@ class EthernetDevice:
             raise ConnectionError(f"{self.name}: Could not write '{message}'. Error: '{err}'.")
         else:
             if error_checking:
-                err = self.get_error()
-                if err:
-                    raise ConnectionError(f"{self.name}: Could not write '{message}'. Error: '{err}'.")
+                error_msg = self.get_error()
+                if error_msg:
+                    raise ConnectionError(f"{self.name}: Could not write '{message}'. Error: '{error_msg}'.")
             logging.info(f"{self.name}: Send '{message}'.")
 
-    def read(self, message="", error_checking=True) -> str:
+    def read(self, message: str = "", error_checking: bool = True) -> str:
         """
         Read Message from Device
         :param str message: Message to query
@@ -264,7 +264,7 @@ class EthernetDevice:
             logging.info(f"{self.name}: Recv '{ret}'.")
             return ret
 
-    def open_gui(self):
+    def open_gui(self) -> None:
         """
         Open GUI of Device
         """

@@ -91,7 +91,7 @@ class ScriptTab(QWidget):
             try:
                 params[widget.widget().text()] = float(widget.widget().buddy().text().replace(',', '.'))    # NOQA
             except ValueError:
-                params[widget.widget().text()] = None   # NOQA
+                params[widget.widget().text()] = 0.0   # NOQA
         return params
 
     @property
