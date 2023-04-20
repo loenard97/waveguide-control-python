@@ -1,6 +1,7 @@
+import numpy as np
 from dataclasses import dataclass
 
-from src.measurement.units import *
+from src.measurement.units import us
 
 
 class Sequence:
@@ -63,7 +64,8 @@ class Sequence:
         # "0, 0, 0, 0.1, 0.5, 0.6, 1, 1, 1, 0, 0, 0"
         # This string has to have a minimal length that is not checked for here, because it usually isn't problematic
 
-        return ', '.join([f"{pulse.level:.4f}" for pulse in self.sequence for _ in range(int(pulse.length*sample_rate))])
+        return ', '.join(
+            [f"{pulse.level:.4f}" for pulse in self.sequence for _ in range(int(pulse.length*sample_rate))])
 
 
 @dataclass

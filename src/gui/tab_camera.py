@@ -249,7 +249,7 @@ class CameraTab(QWidget):
         Take Camera Picture and plot it
         """
         # Take Picture
-        logging.info(f"Tab Camera: Taking Picture")
+        logging.info("Tab Camera: Taking Picture")
         try:
             image_data = self._main_window.devices["cam"].take_picture()
         except AttributeError:
@@ -300,7 +300,6 @@ class CameraTab(QWidget):
         self._line_edit_roi_size.setValue(size_x)
 
         logging.info(f"Tab Camera: Set ROI to Pos: 'x={pos_x}, y={pos_y}', Size: 'x={size_x}, y={size_y}'")
-
 
     def _handle_picture_mouse_click(self, event):
         """
@@ -398,7 +397,7 @@ class CameraTab(QWidget):
 
         else:
             # Throw Warning if Stages not connected
-            logging.error(f"Tab Camera: Could not move Stage. One or more Stages are not connected.")
+            logging.error("Tab Camera: Could not move Stage. One or more Stages are not connected.")
             QMessageBox.critical(self._main_window, "Error", "Could not move Stage. One or more Stages are not "
                                                              "connected.")
             return
