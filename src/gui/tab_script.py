@@ -348,12 +348,15 @@ class ScriptTab(QWidget):
         Save current Settings
         """
         settings_path = "script/" + self.directory + '/' + self.script
-        QSettings().setValue("tab_script/directory", self.directory)
-        QSettings().setValue("tab_script/measurement", self.script)
-        QSettings().setValue("tab_script/options", self.options)
-        QSettings().setValue(settings_path + "parameters", self.parameters)
-        QSettings().setValue(settings_path + "comment", self.comment)
-        QSettings().setValue(settings_path + "iterators", self.iterators_str)
+        try:
+            QSettings().setValue("tab_script/directory", self.directory)
+            QSettings().setValue("tab_script/measurement", self.script)
+            QSettings().setValue("tab_script/options", self.options)
+            QSettings().setValue(settings_path + "parameters", self.parameters)
+            QSettings().setValue(settings_path + "comment", self.comment)
+            QSettings().setValue(settings_path + "iterators", self.iterators_str)
+        except AttributeError:
+            pass
 
     @pyqtSlot()
     def _handle_button_add_iterator(self):

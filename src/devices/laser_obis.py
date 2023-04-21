@@ -45,13 +45,14 @@ class LaserOBIS(USBDevice):
 
         return data
 
-    def get_error(self) -> None | str:
+    def get_error(self) -> str:
         """
         No Error handling
         """
+        # TODO: implement
         # print(self.read("SYST:STAT?", error_checking=False))
         # print(self.read("SYST:FAUL?", error_checking=False))
-        return None
+        return ''
 
     def get_identification(self):
         """

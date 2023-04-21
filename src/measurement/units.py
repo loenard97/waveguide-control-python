@@ -30,6 +30,10 @@ V = 1
 mA = 1E-3
 A = 1
 
+# Power
+mW = 1E-3
+W = 1
+
 # Angle
 rad = 1
 deg = 2*np.pi/360
