@@ -5,9 +5,10 @@ Voltcraft Power Supply PPS-11360
 import serial
 
 from PyQt6.QtCore import QTimer, pyqtSlot
-from PyQt6.QtWidgets import QWidget, QLabel, QDoubleSpinBox, QFormLayout, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QLabel, QFormLayout, QHBoxLayout
 
 from src.static_gui_elements.toggle_button import ToggleButton
+from src.static_gui_elements.delayed_spin_box import DelayedDoubleSpinBox
 
 
 class PowersupplyVoltcraft:
@@ -237,12 +238,12 @@ class PPS11360Window(QWidget):
         layout_set_values = QFormLayout()
         widget_set_values = QWidget()
         layout_set_values.addRow(QLabel("<b>Set Values</b>"))
-        self._line_edit_voltage = QDoubleSpinBox()
+        self._line_edit_voltage = DelayedDoubleSpinBox()
         self._line_edit_voltage.setRange(1, self._device.max_voltage)
         self._line_edit_voltage.setValue(float(voltage))
         self._line_edit_voltage.valueChanged.connect(self._handle_line_edit_voltage_changed)
         layout_set_values.addRow(QLabel("Voltage / V"), self._line_edit_voltage)
-        self._line_edit_current = QDoubleSpinBox()
+        self._line_edit_current = DelayedDoubleSpinBox()
         self._line_edit_current.setRange(0, self._device.max_current)
         self._line_edit_current.setValue(float(current))
         self._line_edit_current.valueChanged.connect(self._handle_line_edit_current_changed)

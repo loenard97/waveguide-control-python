@@ -3,11 +3,11 @@ Keysight Arbitrary Waveform Generator
 """
 
 from PyQt6.QtCore import pyqtSlot, QTimer
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QComboBox, QFormLayout, QDoubleSpinBox, QVBoxLayout, \
-    QMainWindow, QFrame
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QComboBox, QFormLayout, QVBoxLayout, QMainWindow, QFrame
 
 from src.devices.main_device import EthernetDevice
 from src.static_gui_elements.toggle_button import ToggleButton
+from src.static_gui_elements.delayed_spin_box import DelayedDoubleSpinBox
 
 
 class AWGKeysight(EthernetDevice):
@@ -563,27 +563,27 @@ class WaveformKeysightDualWindow(QMainWindow):
 
         # Create Layout depending on selected Waveform
         if waveform == "SIN":
-            line_edit_frequency = QDoubleSpinBox()
+            line_edit_frequency = DelayedDoubleSpinBox()
             line_edit_frequency.setDecimals(6)
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
                 lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
-            line_edit_amplitude = QDoubleSpinBox()
+            line_edit_amplitude = DelayedDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
                 lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
-            line_edit_offset = QDoubleSpinBox()
+            line_edit_offset = DelayedDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
             line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
-            line_edit_phase = QDoubleSpinBox()
+            line_edit_phase = DelayedDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
@@ -591,33 +591,33 @@ class WaveformKeysightDualWindow(QMainWindow):
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
 
         elif waveform == "SQU":
-            line_edit_frequency = QDoubleSpinBox()
+            line_edit_frequency = DelayedDoubleSpinBox()
             line_edit_frequency.setDecimals(6)
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
                 lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
-            line_edit_amplitude = QDoubleSpinBox()
+            line_edit_amplitude = DelayedDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
                 lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
-            line_edit_offset = QDoubleSpinBox()
+            line_edit_offset = DelayedDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
             line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
-            line_edit_phase = QDoubleSpinBox()
+            line_edit_phase = DelayedDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
             line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.value()))  # NOQA
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
-            line_edit_duty_cycle = QDoubleSpinBox()
+            line_edit_duty_cycle = DelayedDoubleSpinBox()
             line_edit_duty_cycle.setDecimals(2)
             line_edit_duty_cycle.setRange(0.05, 99.95)
             line_edit_duty_cycle.setValue(self._device.get_square_duty_cycle(channel))
@@ -626,27 +626,27 @@ class WaveformKeysightDualWindow(QMainWindow):
             layout_new.addRow(QLabel("Duty Cycle / %"), line_edit_duty_cycle)
 
         elif waveform == "TRI":
-            line_edit_frequency = QDoubleSpinBox()
+            line_edit_frequency = DelayedDoubleSpinBox()
             line_edit_frequency.setDecimals(6)
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
                 lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
-            line_edit_amplitude = QDoubleSpinBox()
+            line_edit_amplitude = DelayedDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
                 lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
-            line_edit_offset = QDoubleSpinBox()
+            line_edit_offset = DelayedDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
             line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
-            line_edit_phase = QDoubleSpinBox()
+            line_edit_phase = DelayedDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
@@ -654,33 +654,33 @@ class WaveformKeysightDualWindow(QMainWindow):
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
 
         elif waveform == "RAMP":
-            line_edit_frequency = QDoubleSpinBox()
+            line_edit_frequency = DelayedDoubleSpinBox()
             line_edit_frequency.setDecimals(6)
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
                 lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
-            line_edit_amplitude = QDoubleSpinBox()
+            line_edit_amplitude = DelayedDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
                 lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
-            line_edit_offset = QDoubleSpinBox()
+            line_edit_offset = DelayedDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
             line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
-            line_edit_phase = QDoubleSpinBox()
+            line_edit_phase = DelayedDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
             line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.value()))  # NOQA
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
-            line_edit_symmetry = QDoubleSpinBox()
+            line_edit_symmetry = DelayedDoubleSpinBox()
             line_edit_symmetry.setDecimals(2)
             line_edit_symmetry.setRange(0, 100)
             line_edit_symmetry.setValue(self._device.get_ramp_symmetry(channel))
@@ -689,46 +689,46 @@ class WaveformKeysightDualWindow(QMainWindow):
             layout_new.addRow(QLabel("Symmetry / %"), line_edit_symmetry)
 
         elif waveform == "PULS":
-            line_edit_frequency = QDoubleSpinBox()
+            line_edit_frequency = DelayedDoubleSpinBox()
             line_edit_frequency.setDecimals(6)
             line_edit_frequency.setRange(1e-6, 30e6)
             line_edit_frequency.setValue(self._device.get_frequency(channel))
             line_edit_frequency.textChanged.connect(  # NOQA
                 lambda: self._device.set_frequency(channel, line_edit_frequency.value()))
             layout_new.addRow(QLabel("Frequency / Hz"), line_edit_frequency)
-            line_edit_amplitude = QDoubleSpinBox()
+            line_edit_amplitude = DelayedDoubleSpinBox()
             line_edit_amplitude.setDecimals(3)
             line_edit_amplitude.setRange(1e-3, 5)
             line_edit_amplitude.setValue(self._device.get_amplitude(channel))
             line_edit_amplitude.textChanged.connect(  # NOQA
                 lambda: self._device.set_amplitude(channel, line_edit_amplitude.value()))
             layout_new.addRow(QLabel("Amplitude / V"), line_edit_amplitude)
-            line_edit_offset = QDoubleSpinBox()
+            line_edit_offset = DelayedDoubleSpinBox()
             line_edit_offset.setDecimals(3)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))
             line_edit_offset.textChanged.connect(lambda: self._device.set_offset(channel, line_edit_offset.value()))  # NOQA
             layout_new.addRow(QLabel("Offset / V"), line_edit_offset)
-            line_edit_phase = QDoubleSpinBox()
+            line_edit_phase = DelayedDoubleSpinBox()
             line_edit_phase.setDecimals(3)
             line_edit_phase.setRange(0, 360)
             line_edit_phase.setValue(self._device.get_phase(channel))
             line_edit_phase.textChanged.connect(lambda: self._device.set_phase(channel, line_edit_phase.value()))  # NOQA
             layout_new.addRow(QLabel("Phase / °"), line_edit_phase)
-            line_edit_width = QDoubleSpinBox()
+            line_edit_width = DelayedDoubleSpinBox()
             line_edit_width.setDecimals(9)
             line_edit_width.setRange(5e-9, 1e6)
             line_edit_width.setValue(self._device.get_pulse_width(channel))
             line_edit_width.textChanged.connect(lambda: self._device.set_pulse_width(channel, line_edit_width.value()))  # NOQA
             layout_new.addRow(QLabel("Width / s"), line_edit_width)
-            line_edit_lead_edge = QDoubleSpinBox()
+            line_edit_lead_edge = DelayedDoubleSpinBox()
             line_edit_lead_edge.setDecimals(9)
             line_edit_lead_edge.setRange(3e-9, 1e6)
             line_edit_lead_edge.setValue(self._device.get_pulse_lead_edge(channel))
             line_edit_lead_edge.textChanged.connect(  # NOQA
                 lambda: self._device.set_pulse_lead_edge(channel, line_edit_lead_edge.value()))
             layout_new.addRow(QLabel("Lead Edge / s"), line_edit_lead_edge)
-            line_edit_trail_edge = QDoubleSpinBox()
+            line_edit_trail_edge = DelayedDoubleSpinBox()
             line_edit_trail_edge.setDecimals(9)
             line_edit_trail_edge.setRange(3e-9, 1e6)
             line_edit_trail_edge.setValue(self._device.get_pulse_trail_edge(channel))
@@ -746,7 +746,7 @@ class WaveformKeysightDualWindow(QMainWindow):
             layout_new.addRow(QLabel("Not Implemented"))
 
         elif waveform == "DC":
-            line_edit_offset = QDoubleSpinBox()
+            line_edit_offset = DelayedDoubleSpinBox()
             line_edit_offset.setDecimals(4)
             line_edit_offset.setRange(-5, 5)
             line_edit_offset.setValue(self._device.get_offset(channel))

@@ -11,10 +11,10 @@ import numpy as np
 import pyqtgraph as pg
 
 from PyQt6.QtCore import Qt, QEvent, pyqtSlot, QTimer
-from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QPushButton, QLabel, QFormLayout, QComboBox, \
-    QDoubleSpinBox
+from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QPushButton, QLabel, QFormLayout, QComboBox
 
 from src.devices.main_device import Device
+from src.static_gui_elements.delayed_spin_box import DelayedDoubleSpinBox
 
 
 class CameraAndor(Device):
@@ -536,12 +536,12 @@ class CameraAndorWindow(QWidget):
         self._label_pic_info = QLabel()
         self._label_temperature = QLabel()
 
-        self._line_edit_exposure_time = QDoubleSpinBox()
+        self._line_edit_exposure_time = DelayedDoubleSpinBox()
         self._line_edit_exposure_time.setValue(self.device.get_exposure_time())
         self._combo_box_cooling_mode = QComboBox()
         self._combo_box_cooling_mode.addItems(["Full", "Low", "Off"])
         self._combo_box_cooling_mode.setCurrentText(self.device.get_fan_mode())
-        self._line_edit_target_temperature = QDoubleSpinBox()
+        self._line_edit_target_temperature = DelayedDoubleSpinBox()
         self._line_edit_target_temperature.setValue(self.device.get_target_temperature())
 
         self.timer = QTimer()

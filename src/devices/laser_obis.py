@@ -5,10 +5,11 @@ Coherent OBIS Laser with 594nm wavelength and 60mW Power
 import logging
 
 from PyQt6.QtCore import QTimer, QEvent, pyqtSlot, QSettings, QSize, QPoint
-from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QVBoxLayout, QDoubleSpinBox, QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
 
 from src.devices.main_device import USBDevice
 from src.static_gui_elements.toggle_button import ToggleButton
+from src.static_gui_elements.delayed_spin_box import DelayedDoubleSpinBox
 
 
 class LaserOBIS(USBDevice):
@@ -122,7 +123,7 @@ class OBISLaserWindow(QWidget):
         layout_settings.addRow(QLabel("<b>Settings</b>"))
         self._label_current = QLabel()
         layout_settings.addRow(QLabel("Current / A"), self._label_current)
-        self._dsb_power = QDoubleSpinBox()
+        self._dsb_power = DelayedDoubleSpinBox()
         self._dsb_power.setDecimals(3)
         self._dsb_power.setMinimum(self._device.get_power_limit_low())
         self._dsb_power.setMaximum(self._device.get_power_limit_high())
