@@ -1,7 +1,8 @@
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QDoubleSpinBox, QFormLayout, QWidget, QComboBox
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QFormLayout, QWidget, QComboBox
 
 from src.devices.main_device import USBDevice
 from src.static_gui_elements.toggle_button import ToggleButton
+from src.static_gui_elements.delayed_spin_box import DelayedDoubleSpinBox
 
 
 class LaserDLNSEC(USBDevice):
@@ -107,7 +108,7 @@ class DLNSECLaserWindow(QWidget):
             lambda: self._device.set_mode(combo_box_mode.currentText())
         )
         layout_settings.addRow(QLabel("Mode"), combo_box_mode)
-        line_edit_power = QDoubleSpinBox()
+        line_edit_power = DelayedDoubleSpinBox()
         line_edit_power.setDecimals(0)
         line_edit_power.setRange(0, 100)
         line_edit_power.textChanged.connect(

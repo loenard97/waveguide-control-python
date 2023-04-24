@@ -13,10 +13,11 @@ import numpy as np
 from ftplib import FTP
 
 from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QDoubleSpinBox, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QVBoxLayout
 
 from src.devices.main_device import EthernetDevice
 from src.static_gui_elements.toggle_button import ToggleButton
+from src.static_gui_elements.delayed_spin_box import DelayedDoubleSpinBox
 
 
 class RFGRohdeSchwarz(EthernetDevice):
@@ -329,12 +330,12 @@ class RFGRohdeSchwarzWindow(QWidget):
         # Form Layout
         form_layout = QFormLayout()
         form_layout.addRow(QLabel("<b>CW RF Signal</b>"))
-        dsb_frequency = QDoubleSpinBox()
+        dsb_frequency = DelayedDoubleSpinBox()
         dsb_frequency.setRange(0, 14000)
         dsb_frequency.setValue(self._device.get_frequency())
         dsb_frequency.valueChanged.connect(self._handle_frequency_changed)
         form_layout.addRow(QLabel("Frequency / MHz"), dsb_frequency)
-        dsb_amplitude = QDoubleSpinBox()
+        dsb_amplitude = DelayedDoubleSpinBox()
         dsb_amplitude.setRange(-60, 20)
         dsb_amplitude.setValue(self._device.get_amplitude())
         dsb_amplitude.valueChanged.connect(self._handle_amplitude_changed)

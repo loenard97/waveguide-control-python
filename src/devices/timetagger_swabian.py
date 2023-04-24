@@ -14,7 +14,7 @@ try:
     # DO NOT IMPORT WITH PIP
     # download and install TimeTagger software from SwabianInstruments website and inherit global python packages when
     # creating new virtual environment
-    import TimeTagger
+    import TimeTagger    # NOQA
 except ModuleNotFoundError as err:
     logging.critical(f"Could not load TimeTagger Module. Is the Time Tagger Software installed? Error: '{err}'")
 

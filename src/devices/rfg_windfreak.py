@@ -8,10 +8,11 @@ Windfreak SynthHDv2 Radio Frequency Generator
 # reset() sets it back to 5. Just call that function at the start of every measurement, and you should be fine.
 
 from PyQt6.QtCore import pyqtSlot, QTimer
-from PyQt6.QtWidgets import QLabel, QFormLayout, QWidget, QGridLayout, QDoubleSpinBox
+from PyQt6.QtWidgets import QLabel, QFormLayout, QWidget, QGridLayout
 
 from src.devices.main_device import USBDevice
 from src.static_gui_elements.toggle_button import ToggleButton
+from src.static_gui_elements.delayed_spin_box import DelayedDoubleSpinBox
 
 
 class RFGWindfreak(USBDevice):
@@ -411,7 +412,7 @@ class SynthHDv2RFGWindow(QWidget):
         self._label_temperature = QLabel()
         layout_info.addRow(QLabel("Temperature / °C"), self._label_temperature)
         self._device.set_clock_reference_frequency(30)
-        self.line_edit_clock_frequency = QDoubleSpinBox()
+        self.line_edit_clock_frequency = DelayedDoubleSpinBox()
         self.line_edit_clock_frequency.setRange(10, 100)
         self.line_edit_clock_frequency.setValue(self._device.get_clock_reference_frequency())
         # self.line_edit_clock_frequency.valueChanged.connect(
@@ -424,14 +425,14 @@ class SynthHDv2RFGWindow(QWidget):
         widget_line_edit_ch1 = QWidget()
         layout_line_edit_ch1 = QFormLayout()
         layout_line_edit_ch1.addRow(QLabel("<b>Channel 1</b>"))
-        self.line_edit_clock_frequency = QDoubleSpinBox()
+        self.line_edit_clock_frequency = DelayedDoubleSpinBox()
         self.line_edit_clock_frequency.setRange(53, 13998)
         self.line_edit_clock_frequency.setValue(self._device.get_frequency(channel=1))
         self.line_edit_clock_frequency.valueChanged.connect(
             lambda: self._device.set_frequency(channel=1, frequency=self.line_edit_clock_frequency.text())
         )
         layout_line_edit_ch1.addRow(QLabel("Frequency / MHz"), self.line_edit_clock_frequency)
-        self.line_edit_amplitude_ch1 = QDoubleSpinBox()
+        self.line_edit_amplitude_ch1 = DelayedDoubleSpinBox()
         self.line_edit_amplitude_ch1.setRange(-60, 20)
         self.line_edit_amplitude_ch1.setValue(self._device.get_amplitude(channel=1))
         self.line_edit_amplitude_ch1.valueChanged.connect(
@@ -444,14 +445,14 @@ class SynthHDv2RFGWindow(QWidget):
         widget_line_edit_ch2 = QWidget()
         layout_line_edit_ch2 = QFormLayout()
         layout_line_edit_ch2.addRow(QLabel("<b>Channel 2</b>"))
-        self.line_edit_frequency_ch2 = QDoubleSpinBox()
+        self.line_edit_frequency_ch2 = DelayedDoubleSpinBox()
         self.line_edit_frequency_ch2.setRange(53, 13998)
         self.line_edit_frequency_ch2.setValue(float(self._device.get_frequency(channel=2)))
         self.line_edit_frequency_ch2.valueChanged.connect(
             lambda: self._device.set_frequency(channel=2, frequency=self.line_edit_frequency_ch2.text())
         )
         layout_line_edit_ch2.addRow(QLabel("Frequency / MHz"), self.line_edit_frequency_ch2)
-        self.line_edit_amplitude_ch2 = QDoubleSpinBox()
+        self.line_edit_amplitude_ch2 = DelayedDoubleSpinBox()
         self.line_edit_amplitude_ch2.setRange(-60, 20)
         self.line_edit_amplitude_ch2.setValue(float(self._device.get_amplitude(channel=2)))
         self.line_edit_amplitude_ch2.valueChanged.connect(

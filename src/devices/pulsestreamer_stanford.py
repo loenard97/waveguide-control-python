@@ -3,9 +3,10 @@ Stanford Pulse Streamer
 """
 
 from PyQt6.QtCore import pyqtSlot, QTimer
-from PyQt6.QtWidgets import QWidget, QLabel, QComboBox, QDoubleSpinBox, QMainWindow, QGridLayout
+from PyQt6.QtWidgets import QWidget, QLabel, QComboBox, QMainWindow, QGridLayout
 
 from src.devices.main_device import EthernetDevice
+from src.static_gui_elements.delayed_spin_box import DelayedDoubleSpinBox
 
 
 class PulsestreamerStanford(EthernetDevice):
@@ -205,7 +206,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
 
         # Channel 1
         layout.addWidget(QLabel("Channel 1"), 0, 1)
-        line_edit_ch1_start = QDoubleSpinBox()
+        line_edit_ch1_start = DelayedDoubleSpinBox()
         line_edit_ch1_start.setDecimals(6)
         line_edit_ch1_start.setRange(0, 1E6)
         line_edit_ch1_start.setValue(float(self._device.get_time_start(channel=1))*1E-6)
@@ -213,7 +214,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_time_start(channel=1, time_start=float(line_edit_ch1_start.text())*1E-6)
         )
         layout.addWidget(line_edit_ch1_start, 1, 1)
-        line_edit_ch1_stop = QDoubleSpinBox()
+        line_edit_ch1_stop = DelayedDoubleSpinBox()
         line_edit_ch1_stop.setDecimals(6)
         line_edit_ch1_stop.setRange(0, 1E6)
         line_edit_ch1_stop.setValue(float(self._device.get_time_stop(channel=1))*1E-6)
@@ -221,7 +222,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_time_stop(channel=1, time_stop=float(line_edit_ch1_stop.text())*1E-6)
         )
         layout.addWidget(line_edit_ch1_stop, 2, 1)
-        line_edit_ch1_amplitude = QDoubleSpinBox()
+        line_edit_ch1_amplitude = DelayedDoubleSpinBox()
         line_edit_ch1_amplitude.setDecimals(2)
         line_edit_ch1_amplitude.setRange(0, 5)
         line_edit_ch1_amplitude.setValue(self._device.get_amplitude(channel=1))
@@ -229,7 +230,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_amplitude(channel=1, amplitude=line_edit_ch1_amplitude.text())
         )
         layout.addWidget(line_edit_ch1_amplitude, 3, 1)
-        line_edit_ch1_offset = QDoubleSpinBox()
+        line_edit_ch1_offset = DelayedDoubleSpinBox()
         line_edit_ch1_offset.setDecimals(3)
         line_edit_ch1_offset.setRange(0, 5)
         line_edit_ch1_offset.setValue(self._device.get_offset(channel=1))
@@ -247,7 +248,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
 
         # Channel 2
         layout.addWidget(QLabel("Channel 2"), 0, 2)
-        line_edit_ch2_start = QDoubleSpinBox()
+        line_edit_ch2_start = DelayedDoubleSpinBox()
         line_edit_ch2_start.setDecimals(6)
         line_edit_ch2_start.setRange(0, 1E6)
         line_edit_ch2_start.setValue(float(self._device.get_time_start(channel=2))*1E-6)
@@ -255,7 +256,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_time_start(channel=2, time_start=float(line_edit_ch2_start.text())*1E-6)
         )
         layout.addWidget(line_edit_ch2_start, 1, 2)
-        line_edit_ch2_stop = QDoubleSpinBox()
+        line_edit_ch2_stop = DelayedDoubleSpinBox()
         line_edit_ch2_stop.setDecimals(6)
         line_edit_ch2_stop.setRange(0, 1E6)
         line_edit_ch2_stop.setValue(float(self._device.get_time_stop(channel=2))*1E-6)
@@ -263,7 +264,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_time_stop(channel=2, time_stop=float(line_edit_ch2_stop.text())*1E-6)
         )
         layout.addWidget(line_edit_ch2_stop, 2, 2)
-        line_edit_ch2_amplitude = QDoubleSpinBox()
+        line_edit_ch2_amplitude = DelayedDoubleSpinBox()
         line_edit_ch2_amplitude.setDecimals(2)
         line_edit_ch2_amplitude.setRange(0, 5)
         line_edit_ch2_amplitude.setValue(self._device.get_amplitude(channel=2))
@@ -271,7 +272,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_amplitude(channel=2, amplitude=line_edit_ch2_amplitude.text())
         )
         layout.addWidget(line_edit_ch2_amplitude, 3, 2)
-        line_edit_ch2_offset = QDoubleSpinBox()
+        line_edit_ch2_offset = DelayedDoubleSpinBox()
         line_edit_ch2_offset.setDecimals(3)
         line_edit_ch2_offset.setRange(0, 5)
         line_edit_ch2_offset.setValue(self._device.get_offset(channel=2))
@@ -289,7 +290,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
 
         # Channel 3
         layout.addWidget(QLabel("Channel 3"), 0, 3)
-        line_edit_ch3_start = QDoubleSpinBox()
+        line_edit_ch3_start = DelayedDoubleSpinBox()
         line_edit_ch3_start.setDecimals(6)
         line_edit_ch3_start.setRange(0, 1E6)
         line_edit_ch3_start.setValue(float(self._device.get_time_start(channel=3))*1E-6)
@@ -297,7 +298,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_time_start(channel=3, time_start=float(line_edit_ch3_start.text())*1E-6)
         )
         layout.addWidget(line_edit_ch3_start, 1, 3)
-        line_edit_ch3_stop = QDoubleSpinBox()
+        line_edit_ch3_stop = DelayedDoubleSpinBox()
         line_edit_ch3_stop.setDecimals(6)
         line_edit_ch3_stop.setRange(0, 1E6)
         line_edit_ch3_stop.setValue(float(self._device.get_time_stop(channel=3))*1E-6)
@@ -305,7 +306,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_time_stop(channel=3, time_stop=float(line_edit_ch3_stop.text())*1E-6)
         )
         layout.addWidget(line_edit_ch3_stop, 2, 3)
-        line_edit_ch3_amplitude = QDoubleSpinBox()
+        line_edit_ch3_amplitude = DelayedDoubleSpinBox()
         line_edit_ch3_amplitude.setDecimals(2)
         line_edit_ch3_amplitude.setRange(0, 5)
         line_edit_ch3_amplitude.setValue(self._device.get_amplitude(channel=3))
@@ -313,7 +314,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_amplitude(channel=3, amplitude=line_edit_ch3_amplitude.text())
         )
         layout.addWidget(line_edit_ch3_amplitude, 3, 3)
-        line_edit_ch3_offset = QDoubleSpinBox()
+        line_edit_ch3_offset = DelayedDoubleSpinBox()
         line_edit_ch3_offset.setDecimals(3)
         line_edit_ch3_offset.setRange(0, 5)
         line_edit_ch3_offset.setValue(self._device.get_offset(channel=3))
@@ -331,7 +332,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
 
         # Channel 4
         layout.addWidget(QLabel("Channel 4"), 0, 4)
-        line_edit_ch4_start = QDoubleSpinBox()
+        line_edit_ch4_start = DelayedDoubleSpinBox()
         line_edit_ch4_start.setDecimals(6)
         line_edit_ch4_start.setRange(0, 1E6)
         line_edit_ch4_start.setValue(float(self._device.get_time_start(channel=4))*1E-6)
@@ -339,7 +340,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_time_start(channel=4, time_start=float(line_edit_ch4_start.text())*1E-6)
         )
         layout.addWidget(line_edit_ch4_start, 1, 4)
-        line_edit_ch4_stop = QDoubleSpinBox()
+        line_edit_ch4_stop = DelayedDoubleSpinBox()
         line_edit_ch4_stop.setDecimals(6)
         line_edit_ch4_stop.setRange(0, 1E6)
         line_edit_ch4_stop.setValue(float(self._device.get_time_stop(channel=4))*1E-6)
@@ -347,7 +348,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_time_stop(channel=4, time_stop=float(line_edit_ch4_stop.text())*1E-6)
         )
         layout.addWidget(line_edit_ch4_stop, 2, 4)
-        line_edit_ch4_amplitude = QDoubleSpinBox()
+        line_edit_ch4_amplitude = DelayedDoubleSpinBox()
         line_edit_ch4_amplitude.setDecimals(2)
         line_edit_ch4_amplitude.setRange(0, 5)
         line_edit_ch4_amplitude.setValue(self._device.get_amplitude(channel=4))
@@ -355,7 +356,7 @@ class StanfordPulseStreamerWindow(QMainWindow):
             lambda: self._device.set_amplitude(channel=4, amplitude=line_edit_ch4_amplitude.text())
         )
         layout.addWidget(line_edit_ch4_amplitude, 3, 4)
-        line_edit_ch4_offset = QDoubleSpinBox()
+        line_edit_ch4_offset = DelayedDoubleSpinBox()
         line_edit_ch4_offset.setDecimals(3)
         line_edit_ch4_offset.setRange(0, 5)
         line_edit_ch4_offset.setValue(self._device.get_offset(channel=4))
