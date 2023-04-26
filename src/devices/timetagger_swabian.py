@@ -62,12 +62,6 @@ class TimetaggerSwabian:
         """
         self._ser.reset()
 
-    def soft_reset(self):
-        """
-        Reset Device but keep initial Settings
-        """
-        self.reset()
-
     def synchronize(self):
         """
         Synchronize

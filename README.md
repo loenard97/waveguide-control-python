@@ -1,5 +1,6 @@
 # Waveguide Control Python
 
+![pipeline status](https://gitlab.rlp.net/agwidera/public/waveguide-control-python/badges/main/pipeline.svg)]
 ![Python](https://img.shields.io/badge/Python-3.9-success)
 ![PyQt6](https://img.shields.io/badge/PyQt-6.3-important)
 

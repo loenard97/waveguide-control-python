@@ -31,14 +31,14 @@ class AWGKeysight(EthernetDevice):
         else:
             self.MAX_SRAT = 62.5E6
 
-    def get_error(self) -> None | str:
+    def get_error(self) -> str:
         """
         Get Last Error
         """
-        err = self.read("SYST:ERR?", error_checking=False)
-        if err == '+0,"No error"':
-            return None
-        return err
+        error_msg = self.read("SYST:ERR?", error_checking=False)
+        if error_msg == '+0,"No error"':
+            return ''
+        return error_msg
 
     def _convert_channel(self, channel):
         """
@@ -68,12 +68,6 @@ class AWGKeysight(EthernetDevice):
         Reset Device to default Settings
         """
         self.write("*RST")
-
-    def soft_reset(self):
-        """
-        Reset Device but keep initial Settings
-        """
-        self.reset()
 
     def trigger(self):
         """

@@ -50,12 +50,6 @@ class RFGRohdeSchwarz(EthernetDevice):
         """
         self.write("*RST")
 
-    def soft_reset(self):
-        """
-        Reset Device but keep initial Settings
-        """
-        self.reset()
-
     def trigger(self):
         """
         Trigger

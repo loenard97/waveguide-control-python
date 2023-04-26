@@ -18,9 +18,6 @@ from src.static_gui_elements.delayed_spin_box import DelayedDoubleSpinBox
 
 class RFGRigol(EthernetDevice):
 
-    # TERMINATION_WRITE = '\n'
-    # TERMINATION_READ = 1
-
     def get_identification(self):
         """
         Get Identification String
@@ -41,9 +38,6 @@ class RFGRigol(EthernetDevice):
         self.write("SYST:PRES:TYPE FAC")
         self.write("SYST:PRES")
         self.write("SYST:CLE")
-
-    def soft_reset(self):
-        self.reset()
 
     def set_output(self, state=False):
         """

@@ -27,10 +27,10 @@ class Device:
         """
         raise NotImplementedError
 
-    def get_error(self) -> None | str:
+    def get_error(self) -> str:
         """
         Get Last Error from Device.
-        :return None | str: None if no Error occurred, otherwise str with Error Message
+        :return str: Empty String if no Error occurred, otherwise Error Message
         :raises NotImplementedError:
         """
         raise NotImplementedError
@@ -38,12 +38,6 @@ class Device:
     def reset(self) -> None:
         """
         Reset Device to default Settings
-        """
-        raise NotImplementedError
-
-    def soft_reset(self) -> None:
-        """
-        Reset Device but keep initial Settings
         """
         raise NotImplementedError
 
@@ -117,10 +111,10 @@ class USBDevice:
         logging.info(f"{self.name}: Disconnect.")
         self._ser.close()
 
-    def get_error(self) -> None | str:
+    def get_error(self) -> str:
         """
         Get Last Error from Device.
-        :return None | str: None if no Error occurred, otherwise str with Error Message
+        :return str: Empty String if no Error occurred, otherwise Error Message
         :raises NotImplementedError:
         """
         raise NotImplementedError
@@ -143,8 +137,10 @@ class USBDevice:
         except pyvisa.errors.VisaIOError as err:
             raise ConnectionError(f"{self.name}: Could not write '{message}'. Error: '{err}'.")
         else:
-            if error_checking and self.get_error() is not None:
-                raise ConnectionError(f"{self.name}: Could not write '{message}'. Error: '{self.get_error()}'.")
+            if error_checking:
+                last_error = self.get_error()
+                if last_error:
+                    raise ConnectionError(f"{self.name}: Could not write '{message}'. Error: '{last_error}'.")
             logging.info(f"{self.name}: Send '{message}'.")
 
     def read(self, message: str = "", error_checking: bool = True) -> str:
@@ -155,16 +151,17 @@ class USBDevice:
         :return: Received Answer
         :raises ConnectionError: Connection failed or Device Error occurred
         """
-        self._ser.read()    # clear input buffer
+        self._ser.reset_input_buffer()
         self.write(message)
         try:
-            # ret = self._ser.readline().decode()[:-self.TERMINATION_READ]
             ret = self._ser.readline().decode().strip()
         except Exception as err:
             raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{err}'.")
         else:
-            if error_checking and self.get_error() is not None:
-                raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{self.get_error()}'.")
+            if error_checking:
+                last_error = self.get_error()
+                if last_error:
+                    raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{last_error}'.")
             logging.info(f"{self.name}: Recv '{ret}'.")
             return ret
 
@@ -208,10 +205,10 @@ class EthernetDevice:
         logging.info(f"{self.name}: Disconnect.")
         self._ser.close()
 
-    def get_error(self) -> None | str:
+    def get_error(self) -> str:
         """
         Get Last Error from Device.
-        :return None | str: None if no Error occurred, otherwise str with Error Message
+        :return str: Empty String if no Error occurred, otherwise Error Message
         :raises NotImplementedError:
         """
         raise NotImplementedError
@@ -219,12 +216,6 @@ class EthernetDevice:
     def reset(self) -> None:
         """
         Reset Device to default Settings
-        """
-        raise NotImplementedError
-
-    def soft_reset(self) -> None:
-        """
-        Reset Device but keep initial Settings
         """
         raise NotImplementedError
 
@@ -259,8 +250,10 @@ class EthernetDevice:
         except pyvisa.errors.VisaIOError as err:
             raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{err}'.")
         else:
-            if error_checking and self.get_error() is not None:
-                raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{self.get_error()}'.")
+            if error_checking:
+                error_msg = self.get_error()
+                if error_msg:
+                    raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{self.get_error()}'.")
             logging.info(f"{self.name}: Recv '{ret}'.")
             return ret
 
