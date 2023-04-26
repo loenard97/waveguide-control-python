@@ -79,11 +79,13 @@ class Measurement:
             file.create_group("Iterators")
             file.create_group("Observables")
 
+        # Reset Devices
+        for device in self.devices.values():
+            device.reset()
+
         # Execute Setup Function of Measurement
         logging.info(f"{self.name}: Starting Setup Function")
         try:
-            for device in self.devices.values():
-                device.soft_reset()
             self.setup_measurement(self.parameters_dict)    # NOQA
         except Exception as err:
             logging.error(f"{self.name}: Error during Setup of Script: '{err}'")

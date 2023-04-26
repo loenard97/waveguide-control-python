@@ -3,7 +3,8 @@ Cobolt Laser Series 06-01
 """
 
 from PyQt6.QtCore import pyqtSlot, QTimer
-from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QComboBox, QDoubleSpinBox, QVBoxLayout, QMainWindow
+from PyQt6.QtWidgets import QWidget, QFormLayout, QLabel, QComboBox, QDoubleSpinBox, QVBoxLayout, QMainWindow, QFrame, \
+    QHBoxLayout
 
 from src.devices.main_device import USBDevice
 from src.measurement.units import mA, mW
@@ -58,8 +59,8 @@ class LaserCobolt(USBDevice):
         """
         Reset Device to default Settings
         """
-        self.set_mode_ci(current=0.0)
-        self._LAST_ERROR = self.read("cf")
+        # TODO
+        pass
 
     def get_serial_number(self):
         """
@@ -102,9 +103,9 @@ class LaserCobolt(USBDevice):
 
     def get_power(self):
         """
-        Get Current Power
+        Get Current Power in W
         """
-        return self.read("pa?")
+        return float(self.read("pa?"))
 
     def get_current(self):
         """
@@ -112,21 +113,23 @@ class LaserCobolt(USBDevice):
         """
         return float(self.read("i?"))
 
-    def set_mode_cw(self, power=0.0):
+    def set_constant_power(self, power=0.0, state=True):
         """
         Set Constant Power Mode
         :param float power: Output Power in W
+        :param bool state: Output State
         """
         self._LAST_ERROR = self.read("cp")
-        self._LAST_ERROR = self.read(f"p {power}")
+        self._LAST_ERROR = self.read(f"p {power if state else 0}")
 
-    def set_mode_ci(self, current=0.0):
+    def set_constant_current(self, current=0.0, state=True):
         """
         Set Constant Current Mode
         :param float current: Diode Current in A
+        :param bool state: Output State
         """
         self._LAST_ERROR = self.read("ci")
-        self._LAST_ERROR = self.read(f"slc {current / mA}")
+        self._LAST_ERROR = self.read(f"slc {current / mA if state else 0}")
 
     def set_modulation_analog(self, power=0.0, state=True):
         """
@@ -310,32 +313,49 @@ class LaserCoboltWindow(QMainWindow):
         self.setWindowTitle(f"{self._device.name}")
         self.setGeometry(900, 500, 0, 0)
 
-        # Channel 1
+        # Operating Mode
         widget_cb = QWidget()
         layout_cb = QFormLayout()
         self._widget_form = QWidget()
-        self._layout_form = QVBoxLayout()
+        self._layout_mode = QVBoxLayout()
         self._cb_mode = QComboBox()
-        self._cb_mode.addItems(["Continous Current", "Continous Power", "Digital Modulation"])
+        self._cb_mode.addItems(["Continuous Current", "Continuous Power", "Digital Modulation"])
         self._cb_mode.currentIndexChanged.connect(self._handle_mode_changed)    # NOQA
-        layout_cb.addRow(QLabel("Operating Mode"), self._cb_mode)
-        widget_cb.setLayout(layout_cb)
+        layout_cb.addRow(QLabel("<b>Mode</b>"), self._cb_mode)
 
-        widget_info = QWidget()
-        layout_info = QFormLayout()
-        layout_info.addWidget(QLabel("Info"))
-        widget_info.setLayout(layout_info)
-
-        # Output Buttons
+        # Output Button
         self._btn_output = ToggleButton(state=self._device.get_output())
         self._btn_output.clicked.connect(self._handle_btn_output)
 
+        self._layout_mode.addWidget(widget_cb)
+        self._layout_mode.addWidget(self._widget_form)
+        self._layout_mode.addWidget(self._btn_output)
+        widget_cb.setLayout(layout_cb)
+
+        # Separator
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.VLine)
+        line.setFrameShadow(QFrame.Shadow.Sunken)
+
+        # Info
+        widget_info = QWidget()
+        layout_info = QFormLayout()
+        layout_info.addWidget(QLabel("<b>Info</b>"))
+        self._label_power = QLabel(f"{self._device.get_power() / mW:.2f}")
+        layout_info.addRow(QLabel("Power / mW"), self._label_power)
+        self._label_mode = QLabel(self._device.get_operating_mode())
+        layout_info.addRow(QLabel("Operating Mode"), self._label_mode)
+        self._label_hrs = QLabel(self._device.get_diode_operating_hours())
+        layout_info.addRow(QLabel("Diode Hours"), self._label_hrs)
+        widget_info.setLayout(layout_info)
+
         # Total Layout
         widget_total = QWidget()
-        self._layout_form.addWidget(widget_cb)
-        self._layout_form.addWidget(self._widget_form)
-        self._layout_form.addWidget(self._btn_output)
-        widget_total.setLayout(self._layout_form)
+        layout_total = QHBoxLayout()
+        layout_total.addLayout(self._layout_mode)
+        layout_total.addWidget(line)
+        layout_total.addWidget(widget_info)
+        widget_total.setLayout(layout_total)
         self.setCentralWidget(widget_total)
 
         # Status Bar
@@ -344,7 +364,7 @@ class LaserCoboltWindow(QMainWindow):
 
         # Status Bar Timer
         self._timer = QTimer()
-        self._timer.timeout.connect(self._update_error_label)  # NOQA
+        self._timer.timeout.connect(self._update_error_label)    # NOQA
         self._timer.start(2000)
 
         # Initialization
@@ -364,7 +384,7 @@ class LaserCoboltWindow(QMainWindow):
         cur_mode = self._cb_mode.currentText()
 
         # Create Layout depending on selected Waveform
-        if cur_mode == "Continous Current":
+        if cur_mode == "Continuous Current":
             self._device.read("ci")
             sb_current = QDoubleSpinBox()
             sb_current.setDecimals(0)
@@ -374,14 +394,14 @@ class LaserCoboltWindow(QMainWindow):
                 lambda: self._device.set_laser_current(sb_current.value()*mA))
             layout_new.addRow(QLabel("Current / mA"), sb_current)
 
-        elif cur_mode == "Continous Power":
+        elif cur_mode == "Continuous Power":
             layout_new.addRow(QLabel("Not Implemented"))
 
         elif cur_mode == "Digital Modulation":
             layout_new.addRow(QLabel("Not Implemented"))
 
         # Replace old Widget
-        self._layout_form.replaceWidget(self._widget_form, widget_new)
+        self._layout_mode.replaceWidget(self._widget_form, widget_new)
         self._widget_form.hide()
         self._widget_form.destroy()
         self._widget_form = widget_new
@@ -396,10 +416,10 @@ class LaserCoboltWindow(QMainWindow):
         cur_mode = self._cb_mode.currentText()
         if cur_mode == "Continous Current":
             if self._btn_output.isChecked():
-                self._device.set_mode_ci(current=self._ci_mode_current*mA)
+                self._device.set_constant_current(current=self._ci_mode_current * mA)
             else:
                 self._ci_mode_current = self._device.get_current()
-                self._device.set_mode_ci(current=0.0)
+                self._device.set_constant_current(current=0.0)
 
     @pyqtSlot()
     def _update_error_label(self):

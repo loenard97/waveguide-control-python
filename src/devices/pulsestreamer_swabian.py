@@ -64,12 +64,6 @@ class PulsestreamerSwabian:
         self._ser.constant(self._output_state)
         logging.info(f"{self.name}: Reset.")
 
-    def soft_reset(self):
-        """
-        Reset Device but keep initial Settings
-        """
-        self.reset()
-
     def reboot(self):
         """
         Reboot

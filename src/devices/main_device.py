@@ -41,12 +41,6 @@ class Device:
         """
         raise NotImplementedError
 
-    def soft_reset(self) -> None:
-        """
-        Reset Device but keep initial Settings
-        """
-        raise NotImplementedError
-
     def write(self, message: str = "", error_checking: bool = True) -> None:
         """
         Write Message to Device
@@ -225,12 +219,6 @@ class EthernetDevice:
         """
         raise NotImplementedError
 
-    def soft_reset(self) -> None:
-        """
-        Reset Device but keep initial Settings
-        """
-        raise NotImplementedError
-
     def write(self, message: str = "", error_checking: bool = True) -> None:
         """
         Write Message to Device
@@ -262,8 +250,10 @@ class EthernetDevice:
         except pyvisa.errors.VisaIOError as err:
             raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{err}'.")
         else:
-            if error_checking and self.get_error() is not None:
-                raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{self.get_error()}'.")
+            if error_checking:
+                error_msg = self.get_error()
+                if error_msg:
+                    raise ConnectionError(f"{self.name}: Could not read '{message}'. Error: '{self.get_error()}'.")
             logging.info(f"{self.name}: Recv '{ret}'.")
             return ret
 
